@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">NanoDalvik</string>
+    <string name="bytecode_editor">BYTECODE EDITOR</string>
+    <string name="console_output">CONSOLE OUTPUT</string>
+    <string name="stack_visualizer">STACK VISUALIZER</string>
+    <string name="run">▶ RUN</string>
+    <string name="step">⏭ STEP</string>
 </resources>
