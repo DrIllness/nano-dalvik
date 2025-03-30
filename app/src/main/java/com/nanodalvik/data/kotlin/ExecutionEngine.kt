@@ -15,7 +15,8 @@ class ExecutionEngine {
         if (program.errorReporter.hasErrors()) {
             return ExecutionResult(
                     errors = program.errorReporter.errors,
-                    output = emptyList()
+                    output = emptyList(),
+                    stackState = emptyList()
             )
         }
 
@@ -31,7 +32,7 @@ class ExecutionEngine {
                     val a = stack.pollLast()
                     val b = stack.pollLast()
                     if (a != null && b != null) {
-                        stack.push(a + b)
+                        stack.add(a + b)
                     } else {
                         errors.add(VMErrors.ADD_FAILED)
                     }
@@ -62,7 +63,7 @@ class ExecutionEngine {
                 is Op.Push -> {
                     if (stack.size < STACK_CAPACITY) {
                         val addResult = runCatching {
-                            stack.push(op.operand)
+                            stack.add(op.operand)
                         }
                         if (addResult.isFailure) {
                             // handle exception here
@@ -79,7 +80,8 @@ class ExecutionEngine {
         // we assume that error on this stage breaks execution
         return ExecutionResult(
                 errors = errors,
-                output = output
+                output = output,
+                stackState = stack.toList()
         )
     }
 
@@ -92,7 +94,7 @@ class ExecutionEngine {
 }
 
 object VMOutput {
-    const val HALTED = "Program halted"
+    const val HALTED = "HALTED"
 }
 
 object VMErrors {
@@ -104,5 +106,6 @@ object VMErrors {
 
 class ExecutionResult(
         val errors: List<String>,
-        val output: List<String>
+        val output: List<String>,
+        val stackState: List<Int>
 )

@@ -26,14 +26,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nanodalvik.data.OpCodeNames
 import com.nanodalvik.ui.AppColors
 import com.nanodalvik.ui.NortonButton
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -57,8 +60,15 @@ fun MainScreen() {
 fun MiniDalvikUI() {
     val app = (LocalContext.current.applicationContext as NanoDalvikApp)
 
-    val bytecode = remember { mutableStateOf("") }
-    val consoleOutput = app.observeOutput().collectAsState(initial = "")
+    val bytecode = remember { mutableStateOf(TextFieldValue("")) }
+    val consoleOutput = app.observeOutput().map { logList ->
+        var str = ""
+        for (entry in logList) {
+            str += "${entry.str}\n"
+        }
+        str
+    }.collectAsState(initial = "")
+    val stackState = app.observeStackState().collectAsState(emptyList())
     val scope = rememberCoroutineScope()
 
     Column(
@@ -98,7 +108,16 @@ fun MiniDalvikUI() {
                     for (code in OpCodeNames.entries) {
                         NortonButton(
                                 text = code.name,
-                                onClick = { bytecode.value += "${code.name} " },
+                                onClick = {
+                                    val positionOfCursor = bytecode.value.selection.end
+                                    val sizeOfAddedStr = "${code.name} ".length
+                                    val newText = bytecode.value.text.substring(0, positionOfCursor) +
+                                            "${code.name} " +
+                                            bytecode.value.text.substring(positionOfCursor, bytecode.value.selection.end)
+                                    bytecode.value = TextFieldValue(
+                                            text = newText,
+                                            selection = TextRange(positionOfCursor + sizeOfAddedStr)
+                                    )},
                                 modifier = Modifier
                                     .padding(2.dp)
                                     .fillMaxWidth()
@@ -119,7 +138,7 @@ fun MiniDalvikUI() {
                         onClick = {
                             // todo move it out of here
                             scope.launch {
-                                app.run(bytecode.value)
+                                app.run(bytecode.value.text)
                             }
                         })
                 NortonButton(
@@ -165,7 +184,7 @@ fun MiniDalvikUI() {
                         .fillMaxHeight()
                         .fillMaxWidth()
             ) {
-                items(listOf("0x0010  |  2", "0x0014  |  3")) { item ->
+                items(stackState.value.mapIndexed { i, v -> "[$i] $v" }) { item ->
                     Text(
                             item, color = Color.Cyan, fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(4.dp)

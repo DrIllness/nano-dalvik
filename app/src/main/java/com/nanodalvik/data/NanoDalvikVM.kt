@@ -1,5 +1,6 @@
 package com.nanodalvik.data
 
+import com.nanodalvik.data.kotlin.LogEntry
 import kotlinx.coroutines.flow.Flow
 
 interface NanoDalvikVM {
@@ -10,7 +11,7 @@ interface NanoDalvikVM {
 
     fun shutDown()
 
-    fun observeErrorOutput(): Flow<String>
+    fun observeOutput(): Flow<List<LogEntry>>
 
-    fun observeOutput(): Flow<String>
+    fun observeStackState(): Flow<List<Int>>
 }

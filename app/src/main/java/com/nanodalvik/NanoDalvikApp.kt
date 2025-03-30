@@ -4,6 +4,7 @@ import android.app.Application
 import com.nanodalvik.data.NanoDalvikVM
 import com.nanodalvik.data.kotlin.ExecutionEngine
 import com.nanodalvik.data.kotlin.Lexer
+import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
 import kotlinx.coroutines.flow.Flow
 
@@ -25,8 +26,8 @@ class NanoDalvikApp: Application() {
         dalvikVM.execute(code, emptyList())
     }
 
-    fun observeOutput(): Flow<String> = dalvikVM.observeOutput()
+    fun observeOutput(): Flow<List<LogEntry>> = dalvikVM.observeOutput()
 
-    fun observerErrors(): Flow<String> = dalvikVM.observeErrorOutput()
+    fun observeStackState(): Flow<List<Int>> = dalvikVM.observeStackState()
 
 }
