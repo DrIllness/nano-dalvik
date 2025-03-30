@@ -9,52 +9,57 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import com.nanodalvik.domain.OpCodeNames
+import com.nanodalvik.data.OpCodeNames
+import com.nanodalvik.ui.AppColors
+import com.nanodalvik.ui.NortonButton
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            mainScreen()
+            MainScreen()
         }
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun mainScreen() {
+fun MainScreen() {
     MiniDalvikUI()
 }
 
 @Preview(showBackground = true)
 @Composable
 fun MiniDalvikUI() {
+    val app = (LocalContext.current.applicationContext as NanoDalvikApp)
+
     val bytecode = remember { mutableStateOf("") }
-    val consoleOutput = remember { mutableStateOf("") }
+    val consoleOutput = app.observeOutput().collectAsState(initial = "")
+    val scope = rememberCoroutineScope()
 
     Column(
             modifier = Modifier
@@ -63,7 +68,6 @@ fun MiniDalvikUI() {
                 .background(AppColors.bg)
     ) {
         Column {
-            // Bytecode Editor
             Text(
                     stringResource(id = R.string.bytecode_editor), color = AppColors.title,
                     fontWeight = FontWeight.ExtraBold,
@@ -112,7 +116,12 @@ fun MiniDalvikUI() {
                         modifier = Modifier
                             .weight(0.5f)
                             .padding(end = 2.dp),
-                        onClick = { /* Run Bytecode */ })
+                        onClick = {
+                            // todo move it out of here
+                            scope.launch {
+                                app.run(bytecode.value)
+                            }
+                        })
                 NortonButton(
                         text = stringResource(id = R.string.step),
                         modifier = Modifier
@@ -157,7 +166,10 @@ fun MiniDalvikUI() {
                         .fillMaxWidth()
             ) {
                 items(listOf("0x0010  |  2", "0x0014  |  3")) { item ->
-                    Text(item, color = Color.Cyan, fontWeight = FontWeight.Bold, modifier = Modifier.padding(4.dp))
+                    Text(
+                            item, color = Color.Cyan, fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(4.dp)
+                    )
                 }
             }
         }

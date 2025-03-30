@@ -1,4 +1,4 @@
-package com.nanodalvik.domain
+package com.nanodalvik.data
 
 sealed class Op(val name: String) {
 

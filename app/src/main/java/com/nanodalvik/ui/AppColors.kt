@@ -1,4 +1,4 @@
-package com.nanodalvik
+package com.nanodalvik.ui
 
 import androidx.compose.ui.graphics.Color
 
