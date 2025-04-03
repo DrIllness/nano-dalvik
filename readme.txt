@@ -1,4 +1,8 @@
-TODO next
+Idea
+Idea is simple - make a minimalistic stack-based VM for executing assembly-like code. First implementation will be in Kotlin, but plans are to implement same VM in C/C++, utilizing JNI.
+
+
+TODO
 1. Add step by step execution (need to change approach, split execution to loadProgram/execute).
 In case of step by step exec probably need to generate errors as we go, not at once. However, tokenize
 whole input. Add IP
