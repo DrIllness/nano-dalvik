@@ -138,7 +138,7 @@ fun MiniDalvikUI() {
                         onClick = {
                             // todo move it out of here
                             scope.launch {
-                                app.run(bytecode.value.text)
+                                app.runProgram(bytecode.value.text)
                             }
                         })
                 NortonButton(
@@ -146,7 +146,11 @@ fun MiniDalvikUI() {
                         modifier = Modifier
                             .weight(0.5f)
                             .padding(start = 2.dp),
-                        onClick = { /* Step Execution */ })
+                        onClick = {
+                            scope.launch {
+                                app.nextStep(bytecode.value.text)
+                            }
+                        })
             }
         }
 

@@ -7,9 +7,15 @@ interface NanoDalvikVM {
 
     fun startUp()
 
-    suspend fun execute(code: String, args: List<String>)
+    fun isProgramLoaded(): Boolean
 
-    fun shutDown()
+    fun loadProgram(code: String)
+
+    suspend fun executeProgram()
+
+    suspend fun executeNextOp()
+
+    suspend fun clear()
 
     fun observeOutput(): Flow<List<LogEntry>>
 

@@ -22,8 +22,19 @@ class NanoDalvikApp: Application() {
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
     }
 
-    suspend fun run(code: String) {
-        dalvikVM.execute(code, emptyList())
+    suspend fun runProgram(code: String) {
+        dalvikVM.clear()
+
+        dalvikVM.loadProgram(code)
+        dalvikVM.executeProgram()
+    }
+
+    suspend fun nextStep(code: String) {
+        if (!(dalvikVM.isProgramLoaded())) {
+            dalvikVM.loadProgram(code)
+        }
+
+        dalvikVM.executeNextOp()
     }
 
     fun observeOutput(): Flow<List<LogEntry>> = dalvikVM.observeOutput()
