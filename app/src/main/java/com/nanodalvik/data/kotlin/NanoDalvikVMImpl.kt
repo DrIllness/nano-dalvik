@@ -47,6 +47,7 @@ class NanoDalvikVMKotlinImpl(
     private suspend fun processNextOp() {
         val executionResult = executionEngine.executeNextOp()
         logsToEmit.addAll(executionResult.output.map { line -> LogEntry.OutputLogEntry(line) })
+        logsToEmit.addAll(executionResult.errors.map { line -> LogEntry.OutputLogEntry("ERROR: $line") })
         _output.emit(logsToEmit)
         _stackState.emit(executionResult.stackState)
         _ipToSourcePosition.emit(Pair(executionResult.ipCounter, executionResult.nextOpSourcePosition))

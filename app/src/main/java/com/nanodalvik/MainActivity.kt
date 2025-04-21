@@ -130,6 +130,42 @@ fun MiniDalvikUI() {
                                     fontFamily = FontFamily.Monospace, color = AppColors.border
                             )
                     )
+                    Text(
+                            stringResource(id = R.string.console_output), color = AppColors.title,
+                            fontWeight = FontWeight.ExtraBold,
+                            modifier = Modifier.padding(vertical = 2.dp)
+                    )
+                    Box(
+                            modifier = Modifier
+                                .fillMaxHeight(0.4f)
+                                .fillMaxWidth(0.7f)
+                                .border(2.dp, Color.Cyan)
+                    ) {
+                        Text(
+                                consoleOutput.value, color = Color.Green,
+                                modifier = Modifier.padding(4.dp)
+                        )
+                    }
+
+                    Text(
+                            stringResource(id = R.string.stack_visualizer), color = AppColors.title,
+                            modifier = Modifier.padding(vertical = 4.dp),
+                            fontWeight = FontWeight.ExtraBold
+                    )
+                    LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth(0.7f)
+                                .fillMaxHeight(0.4f)
+                                .border(2.dp, Color.Cyan)
+                    ) {
+                        items(stackState.value.mapIndexed { i, v -> "[$i] $v" }) { item ->
+                            Text(
+                                    item, color = Color.Cyan, fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.padding(4.dp)
+                            )
+                        }
+                    }
+
                 }
                 // side buttons
                 Column(
@@ -189,49 +225,6 @@ fun MiniDalvikUI() {
                                 app.nextStep(bytecode.value.text)
                             }
                         })
-            }
-        }
-
-        Column(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 8.dp)
-                    .padding(bottom = 8.dp)
-        ) {
-            Text(
-                    stringResource(id = R.string.console_output), color = AppColors.title,
-                    fontWeight = FontWeight.ExtraBold, modifier = Modifier.padding(vertical = 2.dp)
-            )
-            Box(
-                    modifier = Modifier
-                        .fillMaxHeight(0.4f)
-                        .fillMaxWidth()
-                        .border(2.dp, Color.Cyan)
-            ) {
-                Text(
-                        consoleOutput.value, color = Color.Green,
-                        modifier = Modifier.padding(4.dp)
-                )
-            }
-
-            Text(
-                    stringResource(id = R.string.stack_visualizer), color = AppColors.title,
-                    modifier = Modifier.padding(vertical = 4.dp),
-                    fontWeight = FontWeight.ExtraBold
-            )
-            LazyColumn(
-                    modifier = Modifier
-                        .border(2.dp, Color.Cyan)
-                        .padding(horizontal = 4.dp)
-                        .fillMaxHeight()
-                        .fillMaxWidth()
-            ) {
-                items(stackState.value.mapIndexed { i, v -> "[$i] $v" }) { item ->
-                    Text(
-                            item, color = Color.Cyan, fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(4.dp)
-                    )
-                }
             }
         }
     }

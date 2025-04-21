@@ -5,6 +5,11 @@ sealed class Op(val name: String) {
     data class Push(val operand: Int) : Op(OpCodeNames.PUSH.name)
     data object Pop : Op(OpCodeNames.POP.name)
     data object Add : Op(OpCodeNames.ADD.name)
+    data object Substract : Op(OpCodeNames.SUB.name)
+    data object Multiply : Op(OpCodeNames.MUL.name)
+    data object Divide : Op(OpCodeNames.DIV.name)
+    data object Modulo: Op(OpCodeNames.MOD.name)
+    data object Negate: Op(OpCodeNames.NEG.name)
     data object Print : Op(OpCodeNames.PRINT.name)
     data object Halt : Op(OpCodeNames.HALT.name)
     data class Jump(val idx: Int) : Op(OpCodeNames.JMP.name)
@@ -21,5 +26,10 @@ enum class OpCodeNames {
     HALT,
     JMP,
     JNZ,
-    JZ
+    JZ,
+    SUB,
+    MUL,
+    DIV,
+    MOD,
+    NEG
 }

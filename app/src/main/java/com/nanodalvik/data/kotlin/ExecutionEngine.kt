@@ -33,7 +33,7 @@ class ExecutionEngine {
         return null
     }
 
-    fun hasNextOp(): Boolean = program?.let { p -> ip <= (p.commands.size - 1)} == true
+    fun hasNextOp(): Boolean = program?.let { p -> ip <= (p.commands.size - 1) } == true
 
     fun executeNextOp(): ExecutionResult {
         val output = mutableListOf<String>()
@@ -46,8 +46,8 @@ class ExecutionEngine {
                 if (stack.size < 2) {
                     errors.add(VMErrors.ADD_FAILED)
                 } else {
-                    val a = stack.pollLast()
                     val b = stack.pollLast()
+                    val a = stack.pollLast()
                     if (a != null && b != null) {
                         stack.add(a + b)
                     } else {
@@ -117,15 +117,91 @@ class ExecutionEngine {
                 }
             }
 
+            Op.Divide -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.DIV_FAILED)
+                } else {
+                    val b = stack.pollLast()
+                    val a = stack.pollLast()
+                    if (a != null && b != null) {
+                        if (b != 0) {
+                            stack.add(a / b)
+                        } else {
+                            errors.add(VMErrors.DIVIDE_BY_ZERO_ATTEMPT)
+                        }
+
+                    } else {
+                        errors.add(VMErrors.ADD_FAILED)
+                    }
+                }
+            }
+
+            Op.Modulo -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.MOD_FAILED)
+                } else {
+                    val b = stack.pollLast()
+                    val a = stack.pollLast()
+                    if (a != null && b != null) {
+                        if (b != 0) {
+                            stack.add(a % b)
+                        } else {
+                            errors.add(VMErrors.DIVIDE_BY_ZERO_ATTEMPT)
+                        }
+
+                    } else {
+                        errors.add(VMErrors.MOD_FAILED)
+                    }
+                }
+            }
+
+            Op.Multiply -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.MUL_FAILED)
+                } else {
+                    val b = stack.pollLast()
+                    val a = stack.pollLast()
+                    if (a != null && b != null) {
+                        stack.add(a * b)
+                    } else {
+                        errors.add(VMErrors.MUL_FAILED)
+                    }
+                }
+            }
+
+            Op.Negate -> {
+                val a = stack.pollLast()
+                if (a != null) {
+                    stack.add(-a)
+                } else {
+                    errors.add(VMErrors.NEG_FAILED)
+                }
+            }
+
+            Op.Substract -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.SUB_FAILED)
+                } else {
+                    val b = stack.pollLast()
+                    val a = stack.pollLast()
+                    if (a != null && b != null) {
+                        stack.add(a - b)
+                    } else {
+                        errors.add(VMErrors.SUB_FAILED)
+                    }
+                }
+            }
         }
 
-        var nextOpWithLine = if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
+        var nextOpWithLine =
+            if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
         // we assume that error on this stage breaks execution
         return ExecutionResult(
                 errors = errors,
                 output = output,
                 sourcePosition = opWithLine.second,
-                nextOpSourcePosition = nextOpWithLine?.second?: opWithLine.second, // pass same position
+                nextOpSourcePosition = nextOpWithLine?.second
+                    ?: opWithLine.second, // pass same position
                 ipCounter = ip,
                 stackState = stack.toList()
         )
@@ -148,6 +224,12 @@ object VMErrors {
     const val STACK_OVERFLOW = "Stack overflowed"
     const val INSTRUCTION_POINTER_OUT_OF_BOUNDS = "Instruction pointer out of bounds"
     const val ADD_FAILED = "Not enough values on stack to apply addition"
+    const val SUB_FAILED = "Not enough values on stack to apply substraction"
+    const val MUL_FAILED = "Not enough values on stack to apply multiplication"
+    const val NEG_FAILED = "Not enough values on stack to apply negate"
+    const val MOD_FAILED = "Not enough values on stack to apply modulo"
+    const val DIV_FAILED = "Not enough values on stack to apply division"
+    const val DIVIDE_BY_ZERO_ATTEMPT = "Attempting to divide by zero"
     const val PRINT_FAILED = "Print failed: stack is empty"
     const val JMP_COMPARISON_FAILED = "Comparison before jump failed: stack is empty"
 }

@@ -31,9 +31,13 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("PUSH requires a numeric operand")
                             }
                         }
-
                         "POP" -> instructions.add(Pair(Op.Pop, token.sourcePosition))
                         "ADD" -> instructions.add(Pair(Op.Add, token.sourcePosition))
+                        "SUB" -> instructions.add(Pair(Op.Substract, token.sourcePosition))
+                        "MUL" -> instructions.add(Pair(Op.Multiply, token.sourcePosition))
+                        "DIV" -> instructions.add(Pair(Op.Divide, token.sourcePosition))
+                        "MOD" -> instructions.add(Pair(Op.Modulo, token.sourcePosition))
+                        "NEG" -> instructions.add(Pair(Op.Negate, token.sourcePosition))
                         "PRINT" -> instructions.add(Pair(Op.Print, token.sourcePosition))
                         "HALT" -> instructions.add(Pair(Op.Halt, token.sourcePosition))
                         "JMP" -> {
@@ -108,7 +112,6 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
         return Program(instructions, reporter)
     }
 
-    private fun hasNextNumberLiteral() = peek() is Token.NumberLiteral
     private fun isAtEnd(): Boolean = current >= tokens.size
     private fun peek(): Token? = tokens.getOrNull(current)
     private fun advance(): Token = tokens[current++]
