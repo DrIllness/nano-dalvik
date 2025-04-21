@@ -10,9 +10,11 @@ class ExecutionEngine {
     private var ip: Int = 0
     private var program: Program? = null
     private var memory = IntArray(MEMORY_CAPACITY)
+    private var state = State.IDLE
 
     fun unloadProgram() {
         program = null
+        state = State.IDLE
     }
 
     fun loadProgram(program: Program): ExecutionResult? {
@@ -34,9 +36,12 @@ class ExecutionEngine {
         return null
     }
 
-    fun hasNextOp(): Boolean = program?.let { p -> ip <= (p.commands.size - 1) } == true
+    fun hasNextOp(): Boolean =
+        (program?.let { p -> ip <= (p.commands.size - 1) } == true) && (state != State.HALTED)
 
     fun executeNextOp(): ExecutionResult {
+        state = State.RUNNING
+
         val output = mutableListOf<String>()
         val errors = mutableListOf<String>()
 
@@ -58,6 +63,7 @@ class ExecutionEngine {
             }
 
             Op.Halt -> {
+                state = State.HALTED
                 output.add(VMOutput.HALTED)
             }
 
@@ -192,11 +198,13 @@ class ExecutionEngine {
                     }
                 }
             }
+
             Op.Drop -> {
                 if (stack.isNotEmpty()) {
                     stack.pollLast()
                 }
             }
+
             Op.Duplicate -> {
                 if (stack.isNotEmpty()) {
                     stack.peekLast()?.let { last ->
@@ -206,6 +214,7 @@ class ExecutionEngine {
                     errors.add(VMErrors.STACK_UNDERFLOW)
                 }
             }
+
             Op.Over -> {
                 if (stack.size < 2) {
                     errors.add(VMErrors.STACK_UNDERFLOW)
@@ -214,6 +223,7 @@ class ExecutionEngine {
                     stack.add(elem)
                 }
             }
+
             Op.Swap -> {
                 if (stack.size < 2) {
                     errors.add(VMErrors.STACK_UNDERFLOW)
@@ -229,9 +239,11 @@ class ExecutionEngine {
             Op.ClearMemory -> {
                 memory = IntArray(Int.MAX_VALUE)
             }
+
             is Op.Load -> {
                 stack.add(memory[op.addr])
             }
+
             is Op.Store -> {
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.STACK_UNDERFLOW)
@@ -264,6 +276,12 @@ class ExecutionEngine {
 
     }
 
+}
+
+enum class State {
+    HALTED,
+    RUNNING,
+    IDLE
 }
 
 object VMOutput {
