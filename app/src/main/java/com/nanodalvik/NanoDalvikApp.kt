@@ -6,6 +6,7 @@ import com.nanodalvik.data.kotlin.ExecutionEngine
 import com.nanodalvik.data.kotlin.Lexer
 import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
+import com.nanodalvik.data.kotlin.SourcePosition
 import kotlinx.coroutines.flow.Flow
 
 class NanoDalvikApp: Application() {
@@ -40,5 +41,7 @@ class NanoDalvikApp: Application() {
     fun observeOutput(): Flow<List<LogEntry>> = dalvikVM.observeOutput()
 
     fun observeStackState(): Flow<List<Int>> = dalvikVM.observeStackState()
+
+    fun observeExecutionPosition(): Flow<Pair<Int, SourcePosition>>  = dalvikVM.observeSourcePosition()
 
 }

@@ -1,6 +1,7 @@
 package com.nanodalvik.data
 
 import com.nanodalvik.data.kotlin.LogEntry
+import com.nanodalvik.data.kotlin.SourcePosition
 import kotlinx.coroutines.flow.Flow
 
 interface NanoDalvikVM {
@@ -20,4 +21,6 @@ interface NanoDalvikVM {
     fun observeOutput(): Flow<List<LogEntry>>
 
     fun observeStackState(): Flow<List<Int>>
+
+    fun observeSourcePosition(): Flow<Pair<Int, SourcePosition>>
 }

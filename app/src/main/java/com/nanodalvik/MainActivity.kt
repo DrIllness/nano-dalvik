@@ -28,12 +28,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nanodalvik.data.OpCodeNames
+import com.nanodalvik.data.kotlin.SourcePosition
 import com.nanodalvik.ui.AppColors
 import com.nanodalvik.ui.NortonButton
 import kotlinx.coroutines.flow.map
@@ -61,6 +63,7 @@ fun MiniDalvikUI() {
     val app = (LocalContext.current.applicationContext as NanoDalvikApp)
 
     val bytecode = remember { mutableStateOf(TextFieldValue("")) }
+    val isStepByStepExecution = remember { mutableStateOf(false) }
     val consoleOutput = app.observeOutput().map { logList ->
         var str = ""
         for (entry in logList) {
@@ -70,6 +73,7 @@ fun MiniDalvikUI() {
     }.collectAsState(initial = "")
     val stackState = app.observeStackState().collectAsState(emptyList())
     val scope = rememberCoroutineScope()
+    val sourcePosition = app.observeExecutionPosition().collectAsState(SourcePosition(0, 0, 0))
 
     Column(
             modifier = Modifier
@@ -137,6 +141,7 @@ fun MiniDalvikUI() {
                             .padding(end = 2.dp),
                         onClick = {
                             // todo move it out of here
+                            isStepByStepExecution.value = false
                             scope.launch {
                                 app.runProgram(bytecode.value.text)
                             }
@@ -147,6 +152,7 @@ fun MiniDalvikUI() {
                             .weight(0.5f)
                             .padding(start = 2.dp),
                         onClick = {
+                            isStepByStepExecution.value = true
                             scope.launch {
                                 app.nextStep(bytecode.value.text)
                             }

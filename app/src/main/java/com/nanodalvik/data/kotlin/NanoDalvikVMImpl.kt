@@ -10,6 +10,7 @@ class NanoDalvikVMKotlinImpl(
 ): NanoDalvikVM {
     private val _output = MutableSharedFlow<List<LogEntry>>(replay = 0)
     private val _stackState = MutableSharedFlow<List<Int>>(replay = 0)
+    private val _ipToSourcePosition = MutableSharedFlow<Pair<Int, SourcePosition>>(replay = 0)
     private val logsToEmit = mutableListOf<LogEntry>()
 
     override fun startUp() {
@@ -48,6 +49,7 @@ class NanoDalvikVMKotlinImpl(
         logsToEmit.addAll(executionResult.output.map { line -> LogEntry.OutputLogEntry(line) })
         _output.emit(logsToEmit)
         _stackState.emit(executionResult.stackState)
+        _ipToSourcePosition.emit(Pair(executionResult.ipCounter, executionResult.sourcePosition))
     }
 
     override suspend fun clear() {
@@ -58,4 +60,5 @@ class NanoDalvikVMKotlinImpl(
 
     override fun observeOutput(): Flow<List<LogEntry>> = _output
     override fun observeStackState(): Flow<List<Int>> = _stackState
+    override fun observeSourcePosition(): Flow<Pair<Int, SourcePosition>> = _ipToSourcePosition
 }

@@ -23,7 +23,9 @@ class ExecutionEngine {
             return ExecutionResult(
                     errors = program.errorReporter.errors,
                     output = emptyList(),
-                    stackState = emptyList()
+                    stackState = emptyList(),
+                    ipCounter = 0,
+                    sourcePosition = SourcePosition(0, 0, 0)
             )
         }
 
@@ -35,8 +37,8 @@ class ExecutionEngine {
     fun executeNextOp(): ExecutionResult {
         val output = mutableListOf<String>()
         val errors = mutableListOf<String>()
-        val op = program!!.commands[ip++] // we make assert for now
-
+        val opWithLine = program!!.commands[ip++] // we make assert for now
+        val op = opWithLine.first
         when (op) {
             Op.Add -> {
                 if (stack.size < 2) {
@@ -68,7 +70,7 @@ class ExecutionEngine {
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.PRINT_FAILED)
                 } else {
-                    output.add(stack.peek()!!.toString())
+                    output.add(stack.peekLast()!!.toString())
                 }
             }
 
@@ -91,6 +93,8 @@ class ExecutionEngine {
         return ExecutionResult(
                 errors = errors,
                 output = output,
+                sourcePosition = opWithLine.second,
+                ipCounter = ip,
                 stackState = stack.toList()
         )
     }
@@ -117,5 +121,7 @@ object VMErrors {
 class ExecutionResult(
         val errors: List<String>,
         val output: List<String>,
+        val ipCounter: Int,
+        val sourcePosition: SourcePosition,
         val stackState: List<Int>
 )
