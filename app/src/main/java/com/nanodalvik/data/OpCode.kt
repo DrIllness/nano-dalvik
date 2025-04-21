@@ -8,9 +8,10 @@ sealed class Op(val name: String) {
     data object Print : Op(OpCodeNames.PRINT.name)
     data object Halt : Op(OpCodeNames.HALT.name)
     data class Jump(val idx: Int) : Op(OpCodeNames.JMP.name)
+    data class JumpNotZero(val idx: Int) : Op(OpCodeNames.JNZ.name)
+    data class JumpZero(val idx: Int) : Op(OpCodeNames.JZ.name)
 
 }
-
 
 enum class OpCodeNames {
     PUSH,
@@ -18,5 +19,7 @@ enum class OpCodeNames {
     ADD,
     PRINT,
     HALT,
-    JMP
+    JMP,
+    JNZ,
+    JZ
 }

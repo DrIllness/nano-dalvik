@@ -54,6 +54,42 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("JUMP requires a numeric operand")
                             }
                         }
+                        "JNZ" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.JumpNotZero(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report("JUMP requires a numeric operand")
+                            }
+                        }
+                        "JZ" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.JumpZero(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report("JUMP requires a numeric operand")
+                            }
+                        }
 
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }

@@ -96,6 +96,27 @@ class ExecutionEngine {
                 else
                     errors.add(VMErrors.INSTRUCTION_POINTER_OUT_OF_BOUNDS)
             }
+
+            is Op.JumpNotZero -> {
+                if (stack.isEmpty()) {
+                    errors.add(VMErrors.JMP_COMPARISON_FAILED)
+                } else {
+                    if (stack.peekLast() != 0) {
+                        ip = op.idx
+                    }
+                }
+            }
+
+            is Op.JumpZero -> {
+                if (stack.isEmpty()) {
+                    errors.add(VMErrors.JMP_COMPARISON_FAILED)
+                } else {
+                    if (stack.peekLast() == 0) {
+                        ip = op.idx
+                    }
+                }
+            }
+
         }
 
         var nextOpWithLine = if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
@@ -128,6 +149,7 @@ object VMErrors {
     const val INSTRUCTION_POINTER_OUT_OF_BOUNDS = "Instruction pointer out of bounds"
     const val ADD_FAILED = "Not enough values on stack to apply addition"
     const val PRINT_FAILED = "Print failed: stack is empty"
+    const val JMP_COMPARISON_FAILED = "Comparison before jump failed: stack is empty"
 }
 
 class ExecutionResult(
