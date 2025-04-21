@@ -22,6 +22,8 @@ sealed class Op(val name: String) {
     data class JumpZero(val idx: Int) : Op(OpCodeNames.JZ.name)
     data class Load(val addr: Int) : Op(OpCodeNames.LOAD.name)
     data class Store(val addr: Int) : Op(OpCodeNames.STORE.name)
+    data class Call(val addr: Int) : Op(OpCodeNames.CALL.name)
+    data object Return : Op(OpCodeNames.RET.name)
 }
 
 enum class OpCodeNames {
@@ -44,5 +46,7 @@ enum class OpCodeNames {
     DUP,
     LOAD,
     STORE,
-    CLEARMEM
+    CLEARMEM,
+    CALL,
+    RET
 }

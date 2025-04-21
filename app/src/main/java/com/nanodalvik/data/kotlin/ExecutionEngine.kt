@@ -7,6 +7,7 @@ import java.util.Deque
 // class to run the Program
 class ExecutionEngine {
     private lateinit var stack: Deque<Int>
+    private lateinit var callStack: Deque<Int>
     private var ip: Int = 0
     private var program: Program? = null
     private var memory = IntArray(MEMORY_CAPACITY)
@@ -21,6 +22,7 @@ class ExecutionEngine {
         ip = 0
         this.program = program
         stack = ArrayDeque<Int>(STACK_CAPACITY)
+        callStack = ArrayDeque<Int>(STACK_CAPACITY)
 
         if (program.errorReporter.hasErrors()) {
             return ExecutionResult(
@@ -253,6 +255,26 @@ class ExecutionEngine {
                     }
                 }
             }
+
+            is Op.Call -> {
+                if (op.addr in 0..(program!!.commands.size - 1)) {
+                    callStack.add(ip)
+                    ip = op.addr
+                } else {
+                    errors.add(VMErrors.INVALID_FUNC_ADDRESS)
+                    state = State.HALTED
+                }
+            }
+            Op.Return -> {
+                if (callStack.isEmpty()) {
+                    errors.add(VMErrors.RET_CALLED_WITH_EMPTY_CALL_STACK)
+                    state = State.HALTED
+                } else {
+                    callStack.pollLast()?.let { poppedIP ->
+                        ip = poppedIP
+                    }
+                }
+            }
         }
 
         var nextOpWithLine =
@@ -292,6 +314,7 @@ object VMErrors {
     const val STACK_UNDERFLOW = "Stack underflow"
     const val STACK_OVERFLOW = "Stack overflowed"
     const val INSTRUCTION_POINTER_OUT_OF_BOUNDS = "Instruction pointer out of bounds"
+    const val RET_CALLED_WITH_EMPTY_CALL_STACK = "RET called with empty call stack. Halting"
     const val ADD_FAILED = "Not enough values on stack to apply addition"
     const val SUB_FAILED = "Not enough values on stack to apply substraction"
     const val MUL_FAILED = "Not enough values on stack to apply multiplication"
@@ -300,6 +323,7 @@ object VMErrors {
     const val DIV_FAILED = "Not enough values on stack to apply division"
     const val DIVIDE_BY_ZERO_ATTEMPT = "Attempting to divide by zero"
     const val PRINT_FAILED = "Print failed: stack is empty"
+    const val INVALID_FUNC_ADDRESS = "CALL used with invalid address. Halting"
     const val JMP_COMPARISON_FAILED = "Comparison before jump failed: stack is empty"
 }
 

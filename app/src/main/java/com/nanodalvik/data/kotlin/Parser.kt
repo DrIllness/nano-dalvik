@@ -161,6 +161,29 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                             }
                         }
 
+                        "CALL" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.Call(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report(
+                                        "CALL requires an address of a function that is being called"
+                                )
+                            }
+                        }
+
+                        "RET" -> instructions.add(Pair(Op.Return, token.sourcePosition))
+
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }
                 }
