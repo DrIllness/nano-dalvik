@@ -40,8 +40,6 @@ class ExecutionEngine {
         val errors = mutableListOf<String>()
 
         val opWithLine = program!!.commands[ip++] // we make assert for now
-        val nextOpWithLine = if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
-
         val op = opWithLine.first
         when (op) {
             Op.Add -> {
@@ -91,8 +89,16 @@ class ExecutionEngine {
                     errors.add(VMErrors.STACK_OVERFLOW)
                 }
             }
+
+            is Op.Jump -> {
+                if (op.idx < program!!.commands.size && op.idx >= 0)
+                    ip = op.idx
+                else
+                    errors.add(VMErrors.INSTRUCTION_POINTER_OUT_OF_BOUNDS)
+            }
         }
 
+        var nextOpWithLine = if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
         // we assume that error on this stage breaks execution
         return ExecutionResult(
                 errors = errors,
@@ -119,6 +125,7 @@ object VMOutput {
 object VMErrors {
     const val STACK_UNDERFLOW = "Stack underflow"
     const val STACK_OVERFLOW = "Stack overflowed"
+    const val INSTRUCTION_POINTER_OUT_OF_BOUNDS = "Instruction pointer out of bounds"
     const val ADD_FAILED = "Not enough values on stack to apply addition"
     const val PRINT_FAILED = "Print failed: stack is empty"
 }

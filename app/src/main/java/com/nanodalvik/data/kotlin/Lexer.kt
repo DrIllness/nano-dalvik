@@ -2,8 +2,8 @@ package com.nanodalvik.data.kotlin
 
 // class to scan raw data and output it into a list of tokens
 class Lexer {
-    fun tokenize(input: String): List<TokenV2> {
-        val tokens = mutableListOf<TokenV2>()
+    fun tokenize(input: String): List<Token> {
+        val tokens = mutableListOf<Token>()
         var currentIndex = 0
 
         fun outOfBounds(): Boolean {
@@ -22,10 +22,10 @@ class Lexer {
             return c == '\n'
         }
 
-        fun wordToToken(word: String, currentLine: Int, start: Int, end: Int): TokenV2 {
+        fun wordToToken(word: String, currentLine: Int, start: Int, end: Int): Token {
             return word.toString().toIntOrNull()?.let { l ->
-                TokenV2.NumberLiteral(l, SourcePosition(currentLine, start, end))
-            } ?: TokenV2.Identifier(
+                Token.NumberLiteral(l, SourcePosition(currentLine, start, end))
+            } ?: Token.Identifier(
                     word.toString(), SourcePosition(currentLine, start, end)
             )
         }
@@ -69,7 +69,7 @@ class Lexer {
             tokens.add(token)
         }
 
-        tokens.add(TokenV2.EOF(SourcePosition(currentLine, currentIndex, currentIndex)))
+        tokens.add(Token.EOF(SourcePosition(currentLine, currentIndex, currentIndex)))
 
         return tokens
     }

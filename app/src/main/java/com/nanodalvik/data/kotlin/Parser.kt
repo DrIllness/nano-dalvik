@@ -2,7 +2,7 @@ package com.nanodalvik.data.kotlin
 
 import com.nanodalvik.data.Op
 
-class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorReporter) {
+class Parser(private val tokens: List<Token>, private val reporter: ErrorReporter) {
     private var current = 0
 
     fun parse(): Program {
@@ -11,11 +11,11 @@ class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorRepor
         while (!isAtEnd()) {
             val token = advance()
             when (token) {
-                is TokenV2.Identifier -> {
+                is Token.Identifier -> {
                     when (token.value.uppercase()) {
                         "PUSH" -> {
                             val next = peek()
-                            if (next is TokenV2.NumberLiteral) {
+                            if (next is Token.NumberLiteral) {
                                 advance()
                                 instructions.add(
                                         Pair(
@@ -36,15 +36,34 @@ class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorRepor
                         "ADD" -> instructions.add(Pair(Op.Add, token.sourcePosition))
                         "PRINT" -> instructions.add(Pair(Op.Print, token.sourcePosition))
                         "HALT" -> instructions.add(Pair(Op.Halt, token.sourcePosition))
+                        "JMP" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.Jump(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report("JUMP requires a numeric operand")
+                            }
+                        }
+
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }
                 }
 
-                is TokenV2.NumberLiteral -> {
+                is Token.NumberLiteral -> {
                     reporter.report("Unexpected number literal: ${token.value}")
                 }
 
-                is TokenV2.EOF -> {
+                is Token.EOF -> {
                     //
                 }
             }
@@ -53,8 +72,9 @@ class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorRepor
         return Program(instructions, reporter)
     }
 
+    private fun hasNextNumberLiteral() = peek() is Token.NumberLiteral
     private fun isAtEnd(): Boolean = current >= tokens.size
-    private fun peek(): TokenV2? = tokens.getOrNull(current)
-    private fun advance(): TokenV2 = tokens[current++]
+    private fun peek(): Token? = tokens.getOrNull(current)
+    private fun advance(): Token = tokens[current++]
 
 }

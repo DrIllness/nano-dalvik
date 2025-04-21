@@ -2,11 +2,12 @@ package com.nanodalvik.data
 
 sealed class Op(val name: String) {
 
-    class Push(val operand: Int) : Op(OpCodeNames.PUSH.name)
+    data class Push(val operand: Int) : Op(OpCodeNames.PUSH.name)
     data object Pop : Op(OpCodeNames.POP.name)
     data object Add : Op(OpCodeNames.ADD.name)
     data object Print : Op(OpCodeNames.PRINT.name)
     data object Halt : Op(OpCodeNames.HALT.name)
+    data class Jump(val idx: Int) : Op(OpCodeNames.JMP.name)
 
 }
 
@@ -16,5 +17,6 @@ enum class OpCodeNames {
     POP,
     ADD,
     PRINT,
-    HALT
+    HALT,
+    JMP
 }
