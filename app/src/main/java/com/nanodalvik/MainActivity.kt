@@ -172,7 +172,10 @@ fun MiniDalvikUI() {
                         modifier = Modifier
                             .padding(horizontal = 4.dp, vertical = 4.dp)
                 ) {
-                    for (code in OpCodeNames.entries) {
+                    val lastHalf = OpCodeNames.entries.slice(
+                            (OpCodeNames.entries.size / 2)..OpCodeNames.entries.size - 1
+                    )
+                    for (code in lastHalf) {
                         NortonButton(
                                 text = code.name,
                                 onClick = {
@@ -191,8 +194,8 @@ fun MiniDalvikUI() {
                                     )
                                 },
                                 modifier = Modifier
-                                    .padding(2.dp)
                                     .fillMaxWidth()
+                                    .padding(2.dp)
                         )
                     }
                 }

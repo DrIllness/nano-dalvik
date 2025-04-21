@@ -191,6 +191,39 @@ class ExecutionEngine {
                     }
                 }
             }
+            Op.Drop -> {
+                if (stack.isNotEmpty()) {
+                    stack.pollLast()
+                }
+            }
+            Op.Duplicate -> {
+                if (stack.isNotEmpty()) {
+                    stack.peekLast()?.let { last ->
+                        stack.add(last)
+                    }
+                } else {
+                    errors.add(VMErrors.STACK_UNDERFLOW)
+                }
+            }
+            Op.Over -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.STACK_UNDERFLOW)
+                } else {
+                    val elem = stack.elementAt(stack.size - 2)
+                    stack.add(elem)
+                }
+            }
+            Op.Swap -> {
+                if (stack.size < 2) {
+                    errors.add(VMErrors.STACK_UNDERFLOW)
+                } else {
+                    val elemB = stack.pollLast()
+                    val elemA = stack.pollLast()
+                    
+                    stack.add(elemB)
+                    stack.add(elemA)
+                }
+            }
         }
 
         var nextOpWithLine =

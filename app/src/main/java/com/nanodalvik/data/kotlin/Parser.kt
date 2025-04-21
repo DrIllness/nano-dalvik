@@ -94,6 +94,10 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("JUMP requires a numeric operand")
                             }
                         }
+                        "DROP" -> { instructions.add(Pair(Op.Drop, token.sourcePosition))}
+                        "SWAP" -> { instructions.add(Pair(Op.Swap, token.sourcePosition))}
+                        "OVER" -> { instructions.add(Pair(Op.Over, token.sourcePosition))}
+                        "DUP" -> { instructions.add(Pair(Op.Duplicate, token.sourcePosition))}
 
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }
