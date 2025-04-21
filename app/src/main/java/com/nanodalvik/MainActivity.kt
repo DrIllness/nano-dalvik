@@ -26,12 +26,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.nanodalvik.data.OpCodeNames
@@ -73,7 +77,29 @@ fun MiniDalvikUI() {
     }.collectAsState(initial = "")
     val stackState = app.observeStackState().collectAsState(emptyList())
     val scope = rememberCoroutineScope()
-    val sourcePosition = app.observeExecutionPosition().collectAsState(SourcePosition(0, 0, 0))
+    val execPair = app.observeExecutionPosition()
+        .collectAsState(initial = 0 to SourcePosition(0, 0, 0))
+    val sourcePos = execPair.value.second
+
+    val highlightVT = remember(bytecode.value.text, sourcePos, isStepByStepExecution.value) {
+        VisualTransformation { original ->
+            val annotated = buildAnnotatedString {
+                append(original)
+                if (isStepByStepExecution.value.not()) return@buildAnnotatedString
+
+                var start = sourcePos.tokenStart
+                val end = sourcePos.tokenEnd.takeIf { it <= original.length - 1 }
+                    ?: (original.length - 1)
+                if (end > start) {
+                    addStyle(
+                            SpanStyle(background = AppColors.title),
+                            start, end
+                    )
+                }
+            }
+            TransformedText(annotated, OffsetMapping.Identity)
+        }
+    }
 
     Column(
             modifier = Modifier
@@ -95,6 +121,7 @@ fun MiniDalvikUI() {
                     TextField(
                             value = bytecode.value,
                             onValueChange = { bytecode.value = it },
+                            visualTransformation = highlightVT,
                             modifier = Modifier
                                 .fillMaxHeight(0.3f)
                                 .fillMaxWidth(0.7f)
@@ -115,13 +142,18 @@ fun MiniDalvikUI() {
                                 onClick = {
                                     val positionOfCursor = bytecode.value.selection.end
                                     val sizeOfAddedStr = "${code.name} ".length
-                                    val newText = bytecode.value.text.substring(0, positionOfCursor) +
-                                            "${code.name} " +
-                                            bytecode.value.text.substring(positionOfCursor, bytecode.value.selection.end)
+                                    val newText =
+                                        bytecode.value.text.substring(0, positionOfCursor) +
+                                                "${code.name} " +
+                                                bytecode.value.text.substring(
+                                                        positionOfCursor,
+                                                        bytecode.value.selection.end
+                                                )
                                     bytecode.value = TextFieldValue(
                                             text = newText,
                                             selection = TextRange(positionOfCursor + sizeOfAddedStr)
-                                    )},
+                                    )
+                                },
                                 modifier = Modifier
                                     .padding(2.dp)
                                     .fillMaxWidth()

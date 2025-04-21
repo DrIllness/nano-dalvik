@@ -25,7 +25,8 @@ class ExecutionEngine {
                     output = emptyList(),
                     stackState = emptyList(),
                     ipCounter = 0,
-                    sourcePosition = SourcePosition(0, 0, 0)
+                    sourcePosition = SourcePosition(0, 0, 0),
+                    nextOpSourcePosition = SourcePosition(0, 0, 0)
             )
         }
 
@@ -37,7 +38,10 @@ class ExecutionEngine {
     fun executeNextOp(): ExecutionResult {
         val output = mutableListOf<String>()
         val errors = mutableListOf<String>()
+
         val opWithLine = program!!.commands[ip++] // we make assert for now
+        val nextOpWithLine = if (hasNextOp()) program!!.commands[ip] else null  // need for step-by-step
+
         val op = opWithLine.first
         when (op) {
             Op.Add -> {
@@ -94,6 +98,7 @@ class ExecutionEngine {
                 errors = errors,
                 output = output,
                 sourcePosition = opWithLine.second,
+                nextOpSourcePosition = nextOpWithLine?.second?: opWithLine.second, // pass same position
                 ipCounter = ip,
                 stackState = stack.toList()
         )
@@ -123,5 +128,6 @@ class ExecutionResult(
         val output: List<String>,
         val ipCounter: Int,
         val sourcePosition: SourcePosition,
+        val nextOpSourcePosition: SourcePosition,
         val stackState: List<Int>
 )

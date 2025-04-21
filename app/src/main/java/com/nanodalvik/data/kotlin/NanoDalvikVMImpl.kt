@@ -49,7 +49,7 @@ class NanoDalvikVMKotlinImpl(
         logsToEmit.addAll(executionResult.output.map { line -> LogEntry.OutputLogEntry(line) })
         _output.emit(logsToEmit)
         _stackState.emit(executionResult.stackState)
-        _ipToSourcePosition.emit(Pair(executionResult.ipCounter, executionResult.sourcePosition))
+        _ipToSourcePosition.emit(Pair(executionResult.ipCounter, executionResult.nextOpSourcePosition))
     }
 
     override suspend fun clear() {

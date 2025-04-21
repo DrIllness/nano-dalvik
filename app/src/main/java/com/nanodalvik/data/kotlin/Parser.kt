@@ -17,7 +17,16 @@ class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorRepor
                             val next = peek()
                             if (next is TokenV2.NumberLiteral) {
                                 advance()
-                                instructions.add(Pair(Op.Push(next.value), token.sourcePosition))
+                                instructions.add(
+                                        Pair(
+                                                Op.Push(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
                             } else {
                                 reporter.report("PUSH requires a numeric operand")
                             }
@@ -34,8 +43,9 @@ class Parser(private val tokens: List<TokenV2>, private val reporter: ErrorRepor
                 is TokenV2.NumberLiteral -> {
                     reporter.report("Unexpected number literal: ${token.value}")
                 }
+
                 is TokenV2.EOF -> {
-                    // noop
+                    //
                 }
             }
         }
