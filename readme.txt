@@ -1,6 +1,40 @@
 Idea
 Minimalistic stack-based VM for executing assembly-like code. First implementation is in Kotlin, but plans are to implement same VM in C/C++, utilizing JNI.
 
+Fibonacci number example:
+// nth fibonacci number
+push 7
+
+store 0
+drop
+
+push 0
+store 1
+push 1
+store 2
+drop
+drop
+load 0
+jz 26
+drop
+load 1
+dup
+load 2
+add
+store 1
+drop
+store 2
+drop
+load 0
+push 1
+sub
+store 0
+drop
+jmp 9
+
+load 1
+print
+
 
 TODO
 add RET/CALL
