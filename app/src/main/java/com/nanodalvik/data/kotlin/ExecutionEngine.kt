@@ -9,6 +9,7 @@ class ExecutionEngine {
     private lateinit var stack: Deque<Int>
     private var ip: Int = 0
     private var program: Program? = null
+    private var memory = IntArray(MEMORY_CAPACITY)
 
     fun unloadProgram() {
         program = null
@@ -219,9 +220,25 @@ class ExecutionEngine {
                 } else {
                     val elemB = stack.pollLast()
                     val elemA = stack.pollLast()
-                    
+
                     stack.add(elemB)
                     stack.add(elemA)
+                }
+            }
+
+            Op.ClearMemory -> {
+                memory = IntArray(Int.MAX_VALUE)
+            }
+            is Op.Load -> {
+                stack.add(memory[op.addr])
+            }
+            is Op.Store -> {
+                if (stack.isEmpty()) {
+                    errors.add(VMErrors.STACK_UNDERFLOW)
+                } else {
+                    stack.peekLast()?.let { elem ->
+                        memory[op.addr] = elem
+                    }
                 }
             }
         }
@@ -243,6 +260,7 @@ class ExecutionEngine {
     companion object {
 
         const val STACK_CAPACITY = 100
+        const val MEMORY_CAPACITY = 1000
 
     }
 

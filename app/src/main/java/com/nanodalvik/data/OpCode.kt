@@ -8,18 +8,20 @@ sealed class Op(val name: String) {
     data object Substract : Op(OpCodeNames.SUB.name)
     data object Multiply : Op(OpCodeNames.MUL.name)
     data object Divide : Op(OpCodeNames.DIV.name)
-    data object Modulo: Op(OpCodeNames.MOD.name)
-    data object Negate: Op(OpCodeNames.NEG.name)
+    data object Modulo : Op(OpCodeNames.MOD.name)
+    data object Negate : Op(OpCodeNames.NEG.name)
     data object Print : Op(OpCodeNames.PRINT.name)
     data object Halt : Op(OpCodeNames.HALT.name)
     data object Duplicate : Op(OpCodeNames.DUP.name)
     data object Over : Op(OpCodeNames.OVER.name)
     data object Swap : Op(OpCodeNames.SWAP.name)
     data object Drop : Op(OpCodeNames.DROP.name)
+    data object ClearMemory : Op(OpCodeNames.CLEARMEM.name)
     data class Jump(val idx: Int) : Op(OpCodeNames.JMP.name)
     data class JumpNotZero(val idx: Int) : Op(OpCodeNames.JNZ.name)
     data class JumpZero(val idx: Int) : Op(OpCodeNames.JZ.name)
-
+    data class Load(val addr: Int) : Op(OpCodeNames.LOAD.name)
+    data class Store(val addr: Int) : Op(OpCodeNames.STORE.name)
 }
 
 enum class OpCodeNames {
@@ -39,5 +41,8 @@ enum class OpCodeNames {
     SWAP,
     DROP,
     OVER,
-    DUP
+    DUP,
+    LOAD,
+    STORE,
+    CLEARMEM
 }

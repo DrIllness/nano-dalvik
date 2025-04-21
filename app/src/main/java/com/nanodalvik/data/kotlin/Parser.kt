@@ -1,6 +1,7 @@
 package com.nanodalvik.data.kotlin
 
 import com.nanodalvik.data.Op
+import com.nanodalvik.data.kotlin.ExecutionEngine.Companion.MEMORY_CAPACITY
 
 class Parser(private val tokens: List<Token>, private val reporter: ErrorReporter) {
     private var current = 0
@@ -31,6 +32,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("PUSH requires a numeric operand")
                             }
                         }
+
                         "POP" -> instructions.add(Pair(Op.Pop, token.sourcePosition))
                         "ADD" -> instructions.add(Pair(Op.Add, token.sourcePosition))
                         "SUB" -> instructions.add(Pair(Op.Substract, token.sourcePosition))
@@ -58,6 +60,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("JUMP requires a numeric operand")
                             }
                         }
+
                         "JNZ" -> {
                             val next = peek()
                             if (next is Token.NumberLiteral) {
@@ -76,6 +79,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("JUMP requires a numeric operand")
                             }
                         }
+
                         "JZ" -> {
                             val next = peek()
                             if (next is Token.NumberLiteral) {
@@ -94,10 +98,68 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 reporter.report("JUMP requires a numeric operand")
                             }
                         }
-                        "DROP" -> { instructions.add(Pair(Op.Drop, token.sourcePosition))}
-                        "SWAP" -> { instructions.add(Pair(Op.Swap, token.sourcePosition))}
-                        "OVER" -> { instructions.add(Pair(Op.Over, token.sourcePosition))}
-                        "DUP" -> { instructions.add(Pair(Op.Duplicate, token.sourcePosition))}
+
+                        "DROP" -> {
+                            instructions.add(Pair(Op.Drop, token.sourcePosition))
+                        }
+
+                        "SWAP" -> {
+                            instructions.add(Pair(Op.Swap, token.sourcePosition))
+                        }
+
+                        "OVER" -> {
+                            instructions.add(Pair(Op.Over, token.sourcePosition))
+                        }
+
+                        "DUP" -> {
+                            instructions.add(Pair(Op.Duplicate, token.sourcePosition))
+                        }
+
+                        "CLEARMEM" -> {
+                            instructions.add(Pair(Op.ClearMemory, token.sourcePosition))
+                        }
+
+                        "STORE" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.Store(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report(
+                                        "STORE requires a numeric operand >= 0 and <= ${MEMORY_CAPACITY}"
+                                )
+                            }
+                        }
+
+                        "LOAD" -> {
+                            val next = peek()
+                            if (next is Token.NumberLiteral) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Op.Load(next.value),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else {
+                                reporter.report(
+                                        "LOAD requires a numeric operand >= 0 and <= ${MEMORY_CAPACITY}"
+                                )
+                            }
+                        }
 
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }
