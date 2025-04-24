@@ -1,5 +1,6 @@
 package com.nanodalvik.data.kotlin
 
+import com.nanodalvik.data.JumpTarget
 import com.nanodalvik.data.Op
 import java.util.ArrayDeque
 import java.util.Deque
@@ -100,28 +101,31 @@ class ExecutionEngine {
             }
 
             is Op.Jump -> {
-                if (op.idx < program!!.commands.size && op.idx >= 0)
-                    ip = op.idx
+                val idx = (op.idx as JumpTarget.Address).index
+                if (idx < program!!.commands.size && idx >= 0)
+                    ip = idx
                 else
                     errors.add(VMErrors.INSTRUCTION_POINTER_OUT_OF_BOUNDS)
             }
 
             is Op.JumpNotZero -> {
+                val idx = (op.idx as JumpTarget.Address).index
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.JMP_COMPARISON_FAILED)
                 } else {
                     if (stack.peekLast() != 0) {
-                        ip = op.idx
+                        ip = idx
                     }
                 }
             }
 
             is Op.JumpZero -> {
+                val idx = (op.idx as JumpTarget.Address).index
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.JMP_COMPARISON_FAILED)
                 } else {
                     if (stack.peekLast() == 0) {
-                        ip = op.idx
+                        ip = idx
                     }
                 }
             }
@@ -257,9 +261,10 @@ class ExecutionEngine {
             }
 
             is Op.Call -> {
-                if (op.addr in 0..(program!!.commands.size - 1)) {
+                val idx = (op.addr as JumpTarget.Address).index
+                if (idx in 0..(program!!.commands.size - 1)) {
                     callStack.add(ip)
-                    ip = op.addr
+                    ip = idx
                 } else {
                     errors.add(VMErrors.INVALID_FUNC_ADDRESS)
                     state = State.HALTED

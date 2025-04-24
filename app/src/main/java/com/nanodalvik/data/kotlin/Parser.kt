@@ -1,6 +1,8 @@
 package com.nanodalvik.data.kotlin
 
+import com.nanodalvik.data.JumpTarget
 import com.nanodalvik.data.Op
+import com.nanodalvik.data.Op.*
 import com.nanodalvik.data.kotlin.ExecutionEngine.Companion.MEMORY_CAPACITY
 
 class Parser(private val tokens: List<Token>, private val reporter: ErrorReporter) {
@@ -8,6 +10,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
 
     fun parse(): Program {
         val instructions = mutableListOf<Pair<Op, SourcePosition>>()
+        val labelMap = mutableMapOf<String, Int>()
 
         while (!isAtEnd()) {
             val token = advance()
@@ -20,7 +23,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.Push(next.value),
+                                                Push(next.value),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -33,22 +36,34 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                             }
                         }
 
-                        "POP" -> instructions.add(Pair(Op.Pop, token.sourcePosition))
-                        "ADD" -> instructions.add(Pair(Op.Add, token.sourcePosition))
-                        "SUB" -> instructions.add(Pair(Op.Substract, token.sourcePosition))
-                        "MUL" -> instructions.add(Pair(Op.Multiply, token.sourcePosition))
-                        "DIV" -> instructions.add(Pair(Op.Divide, token.sourcePosition))
-                        "MOD" -> instructions.add(Pair(Op.Modulo, token.sourcePosition))
-                        "NEG" -> instructions.add(Pair(Op.Negate, token.sourcePosition))
-                        "PRINT" -> instructions.add(Pair(Op.Print, token.sourcePosition))
-                        "HALT" -> instructions.add(Pair(Op.Halt, token.sourcePosition))
+                        "POP" -> instructions.add(Pair(Pop, token.sourcePosition))
+                        "ADD" -> instructions.add(Pair(Add, token.sourcePosition))
+                        "SUB" -> instructions.add(Pair(Substract, token.sourcePosition))
+                        "MUL" -> instructions.add(Pair(Multiply, token.sourcePosition))
+                        "DIV" -> instructions.add(Pair(Divide, token.sourcePosition))
+                        "MOD" -> instructions.add(Pair(Modulo, token.sourcePosition))
+                        "NEG" -> instructions.add(Pair(Negate, token.sourcePosition))
+                        "PRINT" -> instructions.add(Pair(Print, token.sourcePosition))
+                        "HALT" -> instructions.add(Pair(Halt, token.sourcePosition))
                         "JMP" -> {
                             val next = peek()
                             if (next is Token.NumberLiteral) {
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.Jump(next.value),
+                                                Jump(JumpTarget.Address(next.value)),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else if (next is Token.Label) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Jump(JumpTarget.Label(next.value)),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -57,7 +72,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                         )
                                 )
                             } else {
-                                reporter.report("JUMP requires a numeric operand")
+                                reporter.report("JUMP requires a numeric operand OR label")
                             }
                         }
 
@@ -67,7 +82,19 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.JumpNotZero(next.value),
+                                                JumpNotZero(JumpTarget.Address(next.value)),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else if (next is Token.Label) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                JumpNotZero(JumpTarget.Label(next.value)),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -86,7 +113,19 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.JumpZero(next.value),
+                                                JumpZero(JumpTarget.Address(next.value)),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else if (next is Token.Label) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                JumpZero(JumpTarget.Label(next.value)),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -100,23 +139,23 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                         }
 
                         "DROP" -> {
-                            instructions.add(Pair(Op.Drop, token.sourcePosition))
+                            instructions.add(Pair(Drop, token.sourcePosition))
                         }
 
                         "SWAP" -> {
-                            instructions.add(Pair(Op.Swap, token.sourcePosition))
+                            instructions.add(Pair(Swap, token.sourcePosition))
                         }
 
                         "OVER" -> {
-                            instructions.add(Pair(Op.Over, token.sourcePosition))
+                            instructions.add(Pair(Over, token.sourcePosition))
                         }
 
                         "DUP" -> {
-                            instructions.add(Pair(Op.Duplicate, token.sourcePosition))
+                            instructions.add(Pair(Duplicate, token.sourcePosition))
                         }
 
                         "CLEARMEM" -> {
-                            instructions.add(Pair(Op.ClearMemory, token.sourcePosition))
+                            instructions.add(Pair(ClearMemory, token.sourcePosition))
                         }
 
                         "STORE" -> {
@@ -125,7 +164,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.Store(next.value),
+                                                Store(next.value),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -146,7 +185,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.Load(next.value),
+                                                Load(next.value),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -167,7 +206,19 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                                 advance()
                                 instructions.add(
                                         Pair(
-                                                Op.Call(next.value),
+                                                Call(JumpTarget.Address(next.value)),
+                                                SourcePosition(
+                                                        token.sourcePosition.line,
+                                                        token.sourcePosition.tokenStart,
+                                                        next.sourcePosition.tokenEnd //OP with operand
+                                                )
+                                        )
+                                )
+                            } else if (next is Token.Label) {
+                                advance()
+                                instructions.add(
+                                        Pair(
+                                                Call(JumpTarget.Label(next.value)),
                                                 SourcePosition(
                                                         token.sourcePosition.line,
                                                         token.sourcePosition.tokenStart,
@@ -182,7 +233,7 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                             }
                         }
 
-                        "RET" -> instructions.add(Pair(Op.Return, token.sourcePosition))
+                        "RET" -> instructions.add(Pair(Return, token.sourcePosition))
 
                         else -> reporter.report("Unknown instruction: ${token.value}")
                     }
@@ -195,6 +246,98 @@ class Parser(private val tokens: List<Token>, private val reporter: ErrorReporte
                 is Token.EOF -> {
                     //
                 }
+
+                is Token.Label -> {
+                    val next = peek()
+                    if (next is Token.Identifier) {
+                        labelMap[token.value] = instructions.size
+                    } else {
+                        reporter.report("Labels must precede identifier")
+                    }
+                }
+            }
+        }
+
+        for (instruction in instructions) {
+            val op = instruction.first
+            when (op) {
+                is Jump -> {
+                    if (op.idx is JumpTarget.Address) {
+                        continue
+                    }
+
+                    if (op.idx is JumpTarget.Label) {
+                        val name = (op.idx as? JumpTarget.Label)?.name
+                        val idx = labelMap[name]
+                        if (idx == null) {
+                            reporter.report(
+                                    "Unresolved label ${name} at line:${instruction.second.line}"
+                            )
+                            continue
+                        } else {
+                            op.idx = JumpTarget.Address(idx)
+                        }
+                    }
+                }
+
+                is JumpNotZero -> {
+                    if (op.idx is JumpTarget.Address) {
+                        continue
+                    }
+
+                    if (op.idx is JumpTarget.Label) {
+                        val name = (op.idx as? JumpTarget.Label)?.name
+                        val idx = labelMap[name]
+                        if (idx == null) {
+                            reporter.report(
+                                    "Unresolved label ${name} at line:${instruction.second.line}"
+                            )
+                            continue
+                        } else {
+                            op.idx = JumpTarget.Address(idx)
+                        }
+                    }
+                }
+
+                is JumpZero -> {
+                    if (op.idx is JumpTarget.Address) {
+                        continue
+                    }
+
+                    if (op.idx is JumpTarget.Label) {
+                        val name = (op.idx as? JumpTarget.Label)?.name
+                        val idx = labelMap[name]
+                        if (idx == null) {
+                            reporter.report(
+                                    "Unresolved label ${name} at line:${instruction.second.line}"
+                            )
+                            continue
+                        } else {
+                            op.idx = JumpTarget.Address(idx)
+                        }
+                    }
+                }
+
+                is Call -> {
+                    if (op.addr is JumpTarget.Address) {
+                        continue
+                    }
+
+                    if (op.addr is JumpTarget.Label) {
+                        val name = (op.addr as? JumpTarget.Label)?.name
+                        val idx = labelMap[name]
+                        if (idx == null) {
+                            reporter.report(
+                                    "Unresolved label ${name} at line:${instruction.second.line}"
+                            )
+                            continue
+                        } else {
+                            op.addr = JumpTarget.Address(idx)
+                        }
+                    }
+                }
+
+                else -> Unit
             }
         }
 

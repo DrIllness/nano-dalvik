@@ -17,12 +17,12 @@ sealed class Op(val name: String) {
     data object Swap : Op(OpCodeNames.SWAP.name)
     data object Drop : Op(OpCodeNames.DROP.name)
     data object ClearMemory : Op(OpCodeNames.CLEARMEM.name)
-    data class Jump(val idx: Int) : Op(OpCodeNames.JMP.name)
-    data class JumpNotZero(val idx: Int) : Op(OpCodeNames.JNZ.name)
-    data class JumpZero(val idx: Int) : Op(OpCodeNames.JZ.name)
+    data class Jump(var idx: JumpTarget) : Op(OpCodeNames.JMP.name)
+    data class JumpNotZero(var idx: JumpTarget) : Op(OpCodeNames.JNZ.name)
+    data class JumpZero(var idx: JumpTarget) : Op(OpCodeNames.JZ.name)
     data class Load(val addr: Int) : Op(OpCodeNames.LOAD.name)
     data class Store(val addr: Int) : Op(OpCodeNames.STORE.name)
-    data class Call(val addr: Int) : Op(OpCodeNames.CALL.name)
+    data class Call(var addr: JumpTarget) : Op(OpCodeNames.CALL.name)
     data object Return : Op(OpCodeNames.RET.name)
 }
 
@@ -49,4 +49,9 @@ enum class OpCodeNames {
     CLEARMEM,
     CALL,
     RET
+}
+
+sealed class JumpTarget {
+    data class Label(val name: String) : JumpTarget()
+    data class Address(val index: Int) : JumpTarget()
 }

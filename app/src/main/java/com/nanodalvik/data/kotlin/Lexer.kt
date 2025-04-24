@@ -25,9 +25,17 @@ class Lexer {
         fun wordToToken(word: String, currentLine: Int, start: Int, end: Int): Token {
             return word.toString().toIntOrNull()?.let { l ->
                 Token.NumberLiteral(l, SourcePosition(currentLine, start, end))
-            } ?: Token.Identifier(
-                    word.toString(), SourcePosition(currentLine, start, end)
-            )
+            } ?: word.toString().let { w ->
+                if (w.startsWith(":") && w.length > 1) {
+                    Token.Label(
+                            w.drop(1), SourcePosition(currentLine, start, end)
+                    )
+                } else {
+                    Token.Identifier(
+                            w, SourcePosition(currentLine, start, end)
+                    )
+                }
+            }
         }
 
         var isReading = false

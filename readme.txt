@@ -37,7 +37,7 @@ print
 
 
 TODO
-add labels
+add labels support for constants
 (low priority) clean repetition in parser/engine
 (low priority) color the commands. This takes to parse text in realtime, basically, on each
 change in text field
