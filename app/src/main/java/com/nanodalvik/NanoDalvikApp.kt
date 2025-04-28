@@ -2,6 +2,7 @@ package com.nanodalvik
 
 import android.app.Application
 import com.nanodalvik.data.NanoDalvikVM
+import com.nanodalvik.data.cpp.NativeNanoDalvikVMImpl
 import com.nanodalvik.data.kotlin.ExecutionEngine
 import com.nanodalvik.data.kotlin.Lexer
 import com.nanodalvik.data.kotlin.LogEntry
@@ -11,6 +12,7 @@ import kotlinx.coroutines.flow.Flow
 
 class NanoDalvikApp: Application() {
     private lateinit var dalvikVM: NanoDalvikVM
+    private lateinit var nativeDalvikVM: NanoDalvikVM
 
     override fun onCreate() {
         super.onCreate()
@@ -21,6 +23,8 @@ class NanoDalvikApp: Application() {
         val lexer = Lexer()
         val executionEngine = ExecutionEngine()
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
+        nativeDalvikVM = NativeNanoDalvikVMImpl()
+        nativeDalvikVM.loadProgram("example program")
     }
 
     suspend fun runProgram(code: String) {
