@@ -7,6 +7,7 @@ add_library(
         SHARED
         nanodalvik_vm.c
         nanodalvik_vm_jni.c
+        util/stack.c
 )
 
 target_link_libraries(

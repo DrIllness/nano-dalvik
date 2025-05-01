@@ -4,6 +4,7 @@ import com.nanodalvik.data.NanoDalvikVM
 import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.SourcePosition
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 
 class NativeNanoDalvikVMImpl : NanoDalvikVM {
     init {
@@ -11,43 +12,50 @@ class NativeNanoDalvikVMImpl : NanoDalvikVM {
     }
 
     override fun startUp() {
-        TODO("Not yet implemented")
+        startUpNative()
     }
 
     override fun isProgramLoaded(): Boolean {
-        TODO("Not yet implemented")
+        return true
     }
 
     override fun loadProgram(code: String) {
         loadProgramNative(code)
-        nativeTestHello()
     }
 
     override suspend fun executeProgram() {
-        TODO("Not yet implemented")
+        //
     }
 
     override suspend fun executeNextOp() {
-        TODO("Not yet implemented")
+        executeNextOpNative()
     }
 
     override suspend fun clear() {
-        TODO("Not yet implemented")
+        //
     }
 
     override fun observeOutput(): Flow<List<LogEntry>> {
-        TODO("Not yet implemented")
+        return flow {
+            //
+        }
     }
 
     override fun observeStackState(): Flow<List<Int>> {
-        TODO("Not yet implemented")
+        return flow {
+            //
+        }
     }
 
     override fun observeSourcePosition(): Flow<Pair<Int, SourcePosition>> {
-        TODO("Not yet implemented")
+        return flow {
+            //
+        }
     }
 
     private external fun loadProgramNative(code: String)
-    private external fun nativeTestHello()
+    private external fun startUpNative()
+    private external fun executeNextOpNative()
+
 
 }

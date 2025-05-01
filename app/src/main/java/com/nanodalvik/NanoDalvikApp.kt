@@ -24,7 +24,7 @@ class NanoDalvikApp: Application() {
         val executionEngine = ExecutionEngine()
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
         nativeDalvikVM = NativeNanoDalvikVMImpl()
-        nativeDalvikVM.loadProgram("example program")
+        nativeDalvikVM.loadProgram("PUSH 13 PUSH 1 ADD")
     }
 
     suspend fun runProgram(code: String) {
