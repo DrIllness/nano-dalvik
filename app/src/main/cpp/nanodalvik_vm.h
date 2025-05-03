@@ -5,13 +5,16 @@
 #define STATE_RUNNING 1
 #define STATE_IDLE 2
 
-enum TokenType
+#define PUSH "PUSH"
+#define ADD "ADD"
+
+typedef enum
 {
     IDENTIFIER,
     LITERAL
-};
+} TokenType;
 
-enum OPCodeNames
+typedef enum
 {
     OP_PUSH,
     OP_POP,
@@ -35,17 +38,17 @@ enum OPCodeNames
     OP_CLEARMEM,
     OP_CALL,
     OP_RET
-};
+} OPCodeNames;
 
 typedef struct OpCode
 {
-    enum OPCodeNames name;
-    int operand;
+    OPCodeNames name;
+    long operand;
 } OpCode;
 
-typedef union Token
+typedef struct Token
 {
-    enum TokenType type;
+    TokenType type;
     char* identifier;
     long* literal;
 } Token;
@@ -70,12 +73,12 @@ typedef struct NanoDalvik
 
 void nanodalvik_initialize(NanoDalvik* vm);
 
-void nanodalvik_load_program(NanoDalvik* vm, const  char* program);
+void nanodalvik_load_program(NanoDalvik* vm, const char* program);
 
 Token* tokenize(const char* program, int* tokens_amount);
 
-// size is the resulting size of parsed op codes
-OpCode* parse(Token* tokens, int* size);
+// opcode_len is the resulting size of parsed op codes
+OpCode* parse(Token* tokens, int tokens_len, int* opcode_len);
 
 bool nanodalvik_has_next_op(NanoDalvik* vm);
 

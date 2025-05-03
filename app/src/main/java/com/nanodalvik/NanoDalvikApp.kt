@@ -10,7 +10,7 @@ import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
 import com.nanodalvik.data.kotlin.SourcePosition
 import kotlinx.coroutines.flow.Flow
 
-class NanoDalvikApp: Application() {
+class NanoDalvikApp : Application() {
     private lateinit var dalvikVM: NanoDalvikVM
     private lateinit var nativeDalvikVM: NanoDalvikVM
 
@@ -24,6 +24,7 @@ class NanoDalvikApp: Application() {
         val executionEngine = ExecutionEngine()
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
         nativeDalvikVM = NativeNanoDalvikVMImpl()
+        nativeDalvikVM.startUp()
         nativeDalvikVM.loadProgram("PUSH 13 PUSH 1 ADD")
     }
 
@@ -46,6 +47,7 @@ class NanoDalvikApp: Application() {
 
     fun observeStackState(): Flow<List<Int>> = dalvikVM.observeStackState()
 
-    fun observeExecutionPosition(): Flow<Pair<Int, SourcePosition>>  = dalvikVM.observeSourcePosition()
+    fun observeExecutionPosition(): Flow<Pair<Int, SourcePosition>> =
+        dalvikVM.observeSourcePosition()
 
 }

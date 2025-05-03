@@ -17,6 +17,7 @@ Java_com_nanodalvik_data_cpp_NativeNanoDalvikVMImpl_loadProgramNative(JNIEnv *en
 JNIEXPORT void JNICALL
 Java_com_nanodalvik_data_cpp_NativeNanoDalvikVMImpl_startUpNative(JNIEnv *env, jobject thiz)
 {
+    vm = malloc(sizeof(NanoDalvik));
     nanodalvik_initialize(vm);
 }
 

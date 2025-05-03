@@ -9,8 +9,6 @@
 
 void nanodalvik_initialize(NanoDalvik* vm)
 {
-    vm = malloc(sizeof(NanoDalvik));
-
     Stack* stack = malloc(sizeof(Stack));
     stack_new(stack, sizeof(int));
 
@@ -111,17 +109,50 @@ void print_tokenization(Token* tokens, int size)
     }
 }
 
-OpCode* parse(Token* tokens, int* size)
+OpCode* parse(Token* tokens, int tokens_len, int* opcode_len)
 {
-    return NULL;
+    int opcode_amount = 0;
+    OpCode* codes = malloc(sizeof(OpCode) * 30); // todo remove const size
+    for (int i = 0; i < tokens_len; i++)
+    {
+        if (tokens[i].type == IDENTIFIER)
+        {
+            if (strcmp(PUSH, tokens[i].identifier) == 0)
+            {
+                if ((i + 1 < tokens_len) && (tokens[i + 1].type == LITERAL))
+                {
+                    codes[opcode_amount].name = OP_PUSH;
+                    codes[opcode_amount].operand = *tokens[i + 1].literal;
+                    i++;
+                } else
+                {
+                    // raise parser exception here
+                }
+
+            } else if (strcmp(ADD, tokens[i].identifier) == 0)
+            {
+                if ((i + 1 < tokens_len) && (tokens[i + 1].type == LITERAL))
+                {
+                    codes[opcode_amount].name = OP_ADD;
+                    codes[opcode_amount].operand = *tokens[i + 1].literal;
+                    i++;
+                } else
+                {
+                    // raise parser exception here
+                }
+            }
+        }
+        i++;
+    }
+    return codes;
 }
 
 void nanodalvik_load_program(NanoDalvik* vm, const char* program)
 {
     int tokens_amount = 0;
     Token* tokens = tokenize(program, &tokens_amount);
-    //vm->program = malloc(sizeof (OpCode) * tokens_amount);
-    //vm->program = parse(tokens, &vm->program_size);
+
+    vm->program = parse(tokens, tokens_amount, &vm->program_size);
 }
 
 void nanodalvik_clear(NanoDalvik* vm)
