@@ -25,7 +25,7 @@ class NanoDalvikApp : Application() {
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
         nativeDalvikVM = NativeNanoDalvikVMImpl()
         nativeDalvikVM.startUp()
-        nativeDalvikVM.loadProgram("PUSH 13 PUSH 1 ADD")
+        nativeDalvikVM.loadProgram("PUSH 13 PUSH 1 ADD PRINT PRINT POP HALT JMP 129 JNZ 123")
     }
 
     suspend fun runProgram(code: String) {

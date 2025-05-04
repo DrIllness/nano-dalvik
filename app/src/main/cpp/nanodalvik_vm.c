@@ -37,6 +37,25 @@ bool nanodalvik_has_next_op(NanoDalvik* vm)
 
 void print_tokenization(Token* tokens, int size);
 
+void word_to_token(char* word, Token* tokens, int words_amount, int word_size)
+{
+    if (word[0] > '0' && word[0] < '9')
+    {
+        char* end_ptr;
+        (tokens + words_amount)->type = LITERAL;
+        (tokens + words_amount)->literal = (long) strtol(word, &end_ptr, 10);
+        if (end_ptr != (void*) 0)
+        {
+            // handle fail to parse int here here
+        }
+    } else
+    {
+        (tokens + words_amount)->type = IDENTIFIER;
+        (tokens + words_amount)->identifier = malloc(word_size * sizeof(char));
+        strcpy((tokens + words_amount)->identifier, word);
+    }
+}
+
 Token* tokenize(const char* program, int* tokens_amount)
 {
     Token* tokens = malloc((sizeof(Token)) * 30); // init capacity
@@ -56,22 +75,7 @@ Token* tokenize(const char* program, int* tokens_amount)
                 is_reading = false;
                 word[word_size++] = '\0';
 
-                if (word[0] > '0' && word[0] < '9')
-                {
-                    char* end_ptr;
-                    (tokens[words_amount]).type = LITERAL;
-                    (tokens[words_amount].literal) = malloc(sizeof(long));
-                    *(tokens[words_amount].literal) = (long) strtol(word, &end_ptr, 10);
-                    if (end_ptr != '\0')
-                    {
-                        // handle fail to parse int here here
-                    }
-                } else
-                {
-                    (tokens[words_amount]).type = IDENTIFIER;
-                    (tokens[words_amount].identifier) = malloc(word_size * sizeof(char));
-                    strcpy(tokens[words_amount].identifier, word);
-                }
+                word_to_token(word, tokens, words_amount, word_size);
 
                 words_amount++;
                 word_size = 0;
@@ -84,6 +88,11 @@ Token* tokenize(const char* program, int* tokens_amount)
         }
 
         i++;
+    }
+
+    if (is_reading)
+    {
+        word_to_token(word, tokens, words_amount++, word_size);
     }
 
     *tokens_amount = words_amount;
@@ -104,46 +113,72 @@ void print_tokenization(Token* tokens, int size)
             LOGI("%s", t.identifier); // for some reason gives numeric value
         } else
         {
-            LOGI("%ld", *t.literal);
+            LOGI("%ld", t.literal);
         }
     }
+}
+
+static void check_for_following_literal(OpCode* current_op, Token* next_token, OPCodeName name,
+                                        bool* error_occurred)
+{
+    *error_occurred = next_token->type != LITERAL;
+    if (!*error_occurred)
+    {
+        current_op->name = name;
+        current_op->operand = next_token->literal;
+    }
+}
+
+OPCodeName str_to_opcode_name(char* str)
+{
+    OPCodeName code = OP_UNDEFINED;
+    int i = 0;
+    while (i < INSTRUCTION_SET_SIZE)
+    {
+        if (strcasecmp(str, COMMANDS[i].raw_name) == 0)
+        {
+            code = COMMANDS[i].name;
+            return code;
+        }
+        i++;
+    }
+    return code;
 }
 
 OpCode* parse(Token* tokens, int tokens_len, int* opcode_len)
 {
     int opcode_amount = 0;
-    OpCode* codes = malloc(sizeof(OpCode) * 30); // todo remove const size
-    for (int i = 0; i < tokens_len; i++)
+    OpCode* codes = malloc(sizeof(OpCode) * 100); // todo remove const size
+    int i = 0;
+    while (i < tokens_len)
     {
+        OPCodeName current_op_code_name = OP_UNDEFINED;
         if (tokens[i].type == IDENTIFIER)
         {
-            if (strcmp(PUSH, tokens[i].identifier) == 0)
+            bool has_parser_error = false;
+            current_op_code_name = str_to_opcode_name(tokens[i].identifier);
+            if (COMMANDS[current_op_code_name].needs_operand)
             {
-                if ((i + 1 < tokens_len) && (tokens[i + 1].type == LITERAL))
+                if ((i + 1 < tokens_len))
                 {
-                    codes[opcode_amount].name = OP_PUSH;
-                    codes[opcode_amount].operand = *tokens[i + 1].literal;
-                    i++;
+                    check_for_following_literal(&codes[opcode_amount++],
+                                                &tokens[++i],
+                                                current_op_code_name,
+                                                &has_parser_error);
                 } else
                 {
-                    // raise parser exception here
+                    has_parser_error = true;
                 }
-
-            } else if (strcmp(ADD, tokens[i].identifier) == 0)
+            } else
             {
-                if ((i + 1 < tokens_len) && (tokens[i + 1].type == LITERAL))
-                {
-                    codes[opcode_amount].name = OP_ADD;
-                    codes[opcode_amount].operand = *tokens[i + 1].literal;
-                    i++;
-                } else
-                {
-                    // raise parser exception here
-                }
+                codes[opcode_amount++].name = current_op_code_name;
             }
         }
         i++;
     }
+
+    *opcode_len = opcode_amount;
+
     return codes;
 }
 

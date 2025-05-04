@@ -5,17 +5,9 @@
 #define STATE_RUNNING 1
 #define STATE_IDLE 2
 
-#define PUSH "PUSH"
-#define ADD "ADD"
-
-typedef enum
+typedef enum OPCodeName
 {
-    IDENTIFIER,
-    LITERAL
-} TokenType;
-
-typedef enum
-{
+    OP_UNDEFINED = -1,
     OP_PUSH,
     OP_POP,
     OP_ADD,
@@ -38,11 +30,50 @@ typedef enum
     OP_CLEARMEM,
     OP_CALL,
     OP_RET
-} OPCodeNames;
+} OPCodeName;
+
+typedef struct OpMetaData
+{
+    OPCodeName name;
+    char* raw_name;
+    bool needs_operand;
+} OpMetaData;
+
+static int INSTRUCTION_SET_SIZE = 22;
+static OpMetaData COMMANDS[] = {
+        {OP_PUSH,     "PUSH",     true},
+        {OP_POP,      "POP",      false},
+        {OP_ADD,      "ADD",      false},
+        {OP_PRINT,    "PRINT",    false},
+        {OP_HALT,     "HALT",     false},
+        {OP_JMP,      "JMP",      true},
+        {OP_JNZ,      "JNZ",      true},
+        {OP_JZ,       "JZ",       true},
+        {OP_SUB,      "SUB",      false},
+        {OP_MUL,      "MUL",      false},
+        {OP_DIV,      "DIV",      false},
+        {OP_MOD,      "MOD",      false},
+        {OP_NEG,      "NEG",      false},
+        {OP_SWAP,     "SWAP",     false},
+        {OP_DROP,     "DROP",     false},
+        {OP_OVER,     "OVER",     false},
+        {OP_DUP,      "DUP",      false},
+        {OP_LOAD,     "LOAD",     true},
+        {OP_STORE,    "STORE",    true},
+        {OP_CLEARMEM, "CLEARMEM", false},
+        {OP_CALL,     "CALL",     false},
+        {OP_RET, "RET", false}
+};
+
+typedef enum
+{
+    IDENTIFIER,
+    LITERAL
+} TokenType;
 
 typedef struct OpCode
 {
-    OPCodeNames name;
+    OPCodeName name;
     long operand;
 } OpCode;
 
@@ -50,7 +81,7 @@ typedef struct Token
 {
     TokenType type;
     char* identifier;
-    long* literal;
+    long literal;
 } Token;
 
 typedef struct OpResult
