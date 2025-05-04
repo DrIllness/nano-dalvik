@@ -1,5 +1,5 @@
 Idea
-Minimalistic stack-based VM for executing assembly-like code. First implementation is in Kotlin, but plans are to implement same VM in C/C++, utilizing JNI.
+Minimalistic stack-based VM for executing assembly-like code on Android. First implementation is in Kotlin, but plans are to implement same VM in C/C++, utilizing JNI.
 
 Fibonacci number example:
 // 7th fibonacci number
@@ -43,4 +43,5 @@ kotlin version: add labels support for constants
 change in text field
 
 c version:
-write nanodalvik vm load function and execute function
+write execution logic
+pass result to app layer
