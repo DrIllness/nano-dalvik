@@ -24,5 +24,5 @@ Java_com_nanodalvik_data_cpp_NativeNanoDalvikVMImpl_startUpNative(JNIEnv *env, j
 JNIEXPORT void JNICALL
 Java_com_nanodalvik_data_cpp_NativeNanoDalvikVMImpl_executeNextOpNative(JNIEnv *env, jobject thiz)
 {
-    nanodalvik_initialize(vm);
+    nanodalvik_execute_next_op(vm);
 }

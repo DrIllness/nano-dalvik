@@ -5,6 +5,32 @@
 #define STATE_RUNNING 1
 #define STATE_IDLE 2
 
+typedef enum ErrorLevel
+{
+    ERR_LEXER,
+    ERR_PARSER,
+    ERR_EXECUTION
+} ErrorLevel;
+
+typedef enum ErrorCode
+{
+    NO_ERROR,
+    STACK_UNDERFLOW,
+    STACK_OVERFLOW
+} ErrorCode;
+
+typedef struct Error
+{
+    ErrorCode code;
+    ErrorLevel lvl;
+    char* msg;
+} Error;
+
+static Error ERRORS[] = {
+        {STACK_UNDERFLOW, ERR_EXECUTION, "Stack Underflow"},
+        {STACK_OVERFLOW,  ERR_EXECUTION, "Stack Overflow"}
+};
+
 typedef enum OPCodeName
 {
     OP_UNDEFINED = -1,
@@ -62,7 +88,7 @@ static OpMetaData COMMANDS[] = {
         {OP_STORE,    "STORE",    true},
         {OP_CLEARMEM, "CLEARMEM", false},
         {OP_CALL,     "CALL",     false},
-        {OP_RET, "RET", false}
+        {OP_RET,      "RET",      false}
 };
 
 typedef enum

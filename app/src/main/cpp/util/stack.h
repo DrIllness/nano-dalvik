@@ -17,6 +17,8 @@ void stack_dispose(Stack* s);
 
 int stack_push(Stack* s, void* elem_address);
 
+int stack_peek(Stack* s, void* peeked_value);
+
 int stack_pop(Stack* s, void* popped_value);
 
 static int stack_grow(Stack* s);

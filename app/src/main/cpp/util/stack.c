@@ -48,6 +48,18 @@ static int stack_grow(Stack* s)
     return 0;
 }
 
+int stack_peek(Stack* s, void* peeked_value)
+{
+    if (s->logical_len == 0)
+    {
+        return STACK_EMPTY_ERROR;
+    }
+    memcpy(peeked_value, (char*) s->elems + (s->logical_len - 1) * s->elem_size, s->elem_size);
+
+    return 0;
+
+}
+
 int stack_pop(Stack* s, void* popped_value)
 {
     if (s->logical_len == 0)

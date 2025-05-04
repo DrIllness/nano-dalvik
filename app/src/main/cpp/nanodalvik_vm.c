@@ -10,7 +10,7 @@
 void nanodalvik_initialize(NanoDalvik* vm)
 {
     Stack* stack = malloc(sizeof(Stack));
-    stack_new(stack, sizeof(int));
+    stack_new(stack, sizeof(long));
 
     vm->values_stack = stack;
     vm->state = STATE_IDLE;
@@ -19,9 +19,98 @@ void nanodalvik_initialize(NanoDalvik* vm)
 OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
 {
     OpResult* op_res = malloc(sizeof(OpResult));
+    op_res->error = "";
+    op_res->output = "";
+
+    OpCode* op = vm->program + vm->ip;
+    long top_value;
+
+    int error_code = NO_ERROR;
     if (nanodalvik_has_next_op(vm))
     {
-        op_res = nanodalvik_execute_next_op(vm);
+        if (vm->ip < (vm->program_size))
+        {
+            switch (op->name)
+            {
+                case OP_UNDEFINED:
+                    break;
+                case OP_PUSH:
+                    stack_push(vm->values_stack, &op->operand);
+                    break;
+                case OP_POP:
+                    stack_pop(vm->values_stack, &top_value);
+                    break;
+                case OP_ADD:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        long sum;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        sum = val1 + val2;
+                        stack_push(vm->values_stack, &sum);
+                    }
+                    break;
+                case OP_PRINT:
+                    if (stack_peek(vm->values_stack, &top_value) == STACK_EMPTY_ERROR)
+                        error_code = STACK_UNDERFLOW;
+                    else
+                    {
+                        int len = snprintf(NULL, 0, "%ld", top_value);
+                        if (len >= 0)
+                        {
+                            op_res->output = malloc(len + 1);
+                            if (op_res->output)
+                            {
+                                snprintf(op_res->output, len + 1, "%ld", top_value);
+                            }
+                        }
+                    }
+                    break;
+                case OP_HALT:
+                    break;
+                case OP_JMP:
+                    break;
+                case OP_JNZ:
+                    break;
+                case OP_JZ:
+                    break;
+                case OP_SUB:
+                    break;
+                case OP_MUL:
+                    break;
+                case OP_DIV:
+                    break;
+                case OP_MOD:
+                    break;
+                case OP_NEG:
+                    break;
+                case OP_SWAP:
+                    break;
+                case OP_DROP:
+                    break;
+                case OP_OVER:
+                    break;
+                case OP_DUP:
+                    break;
+                case OP_LOAD:
+                    break;
+                case OP_STORE:
+                    break;
+                case OP_CLEARMEM:
+                    break;
+                case OP_CALL:
+                    break;
+                case OP_RET:
+                    break;
+            }
+        }
+        (vm->ip)++;
     }
     return op_res;
 }

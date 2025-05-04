@@ -8,7 +8,9 @@ import com.nanodalvik.data.kotlin.Lexer
 import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
 import com.nanodalvik.data.kotlin.SourcePosition
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 
 class NanoDalvikApp : Application() {
     private lateinit var dalvikVM: NanoDalvikVM
@@ -25,7 +27,15 @@ class NanoDalvikApp : Application() {
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
         nativeDalvikVM = NativeNanoDalvikVMImpl()
         nativeDalvikVM.startUp()
-        nativeDalvikVM.loadProgram("PUSH 13 PUSH 1 ADD PRINT PRINT POP HALT JMP 129 JNZ 123")
+        nativeDalvikVM.loadProgram("PUSH 3 PUSH 1 ADD PRINT")
+
+        // i know this is bad
+        GlobalScope.launch {
+            nativeDalvikVM.executeNextOp()
+            nativeDalvikVM.executeNextOp()
+            nativeDalvikVM.executeNextOp()
+            nativeDalvikVM.executeNextOp()
+        }
     }
 
     suspend fun runProgram(code: String) {
