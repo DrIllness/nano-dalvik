@@ -14,32 +14,26 @@ import kotlinx.coroutines.launch
 
 class NanoDalvikApp : Application() {
     private lateinit var dalvikVM: NanoDalvikVM
-    private lateinit var nativeDalvikVM: NanoDalvikVM
 
     override fun onCreate() {
         super.onCreate()
-        initDalvikVMKotlin()
+        //initDalvikVMKotlin()
+        initDalvikNative()
     }
 
     private fun initDalvikVMKotlin() {
         val lexer = Lexer()
         val executionEngine = ExecutionEngine()
         dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
-        nativeDalvikVM = NativeNanoDalvikVMImpl()
-        nativeDalvikVM.startUp()
-        nativeDalvikVM.loadProgram("PUSH 3 PUSH 1 ADD PRINT")
-
-        // i know this is bad
-        GlobalScope.launch {
-            nativeDalvikVM.executeNextOp()
-            nativeDalvikVM.executeNextOp()
-            nativeDalvikVM.executeNextOp()
-            nativeDalvikVM.executeNextOp()
-        }
+    }
+    private fun initDalvikNative() {
+        dalvikVM = NativeNanoDalvikVMImpl()
+        dalvikVM.startUp()
     }
 
     suspend fun runProgram(code: String) {
         dalvikVM.clear()
+        dalvikVM.startUp()
 
         dalvikVM.loadProgram(code)
         dalvikVM.executeProgram()

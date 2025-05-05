@@ -114,6 +114,8 @@ typedef struct OpResult
 {
     char* output;
     char* error;
+    //int* stack_state;
+    //int ip;
 } OpResult;
 
 void clear_op_result(OpResult* res);

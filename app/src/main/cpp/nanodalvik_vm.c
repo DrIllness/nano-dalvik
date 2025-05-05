@@ -273,6 +273,7 @@ OpCode* parse(Token* tokens, int tokens_len, int* opcode_len)
 
 void nanodalvik_load_program(NanoDalvik* vm, const char* program)
 {
+    vm->ip = 0;
     int tokens_amount = 0;
     Token* tokens = tokenize(program, &tokens_amount);
 
