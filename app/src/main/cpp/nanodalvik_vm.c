@@ -181,6 +181,7 @@ Token* tokenize(const char* program, int* tokens_amount)
 
     if (is_reading)
     {
+        word[word_size++] = '\0';
         word_to_token(word, tokens, words_amount++, word_size);
     }
 

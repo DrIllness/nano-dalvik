@@ -40,7 +40,9 @@ class NativeNanoDalvikVMImpl : NanoDalvikVM {
     }
 
     fun executionResult(result: NativeOPExecutionResult) {
-        logsToEmit.add(LogEntry.OutputLogEntry(result.output ?: ""))
+        result.output?.takeIf { it.isNotBlank() }?.let { output ->
+            logsToEmit.add(LogEntry.OutputLogEntry(output))
+        }
         GlobalScope.launch {
             _output.emit(logsToEmit)
         }
