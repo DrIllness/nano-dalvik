@@ -22,6 +22,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -68,6 +69,7 @@ fun MiniDalvikUI() {
 
     val bytecode = remember { mutableStateOf(TextFieldValue("")) }
     val isStepByStepExecution = remember { mutableStateOf(false) }
+    val mode = remember { mutableStateOf(app.currentMode) }
     val consoleOutput = app.observeOutput().map { logList ->
         var str = ""
         for (entry in logList) {
@@ -174,6 +176,18 @@ fun MiniDalvikUI() {
                 ) {
                     val lastHalf = OpCodeNames.entries.slice(
                             (OpCodeNames.entries.size / 2)..OpCodeNames.entries.size - 1
+                    )
+                    NortonButton(
+                            text = "${mode.value}",
+                            onClick = {
+                                scope.launch {
+                                    app.switchVMMode()
+                                    mode.value = app.currentMode
+                                }
+                            },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(4.dp)
                     )
                     for (code in lastHalf) {
                         NortonButton(

@@ -42,6 +42,8 @@ kotlin version: add labels support for constants
 (low priority) color the commands. This takes to parse text in realtime, basically, on each
 change in text field
 
+both:
+make it possible to switch between different modes
+
 c version:
-write execution logic
-pass result to app layer
+add missing instructions

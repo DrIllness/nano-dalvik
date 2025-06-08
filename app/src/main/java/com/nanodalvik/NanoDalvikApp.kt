@@ -1,6 +1,7 @@
 package com.nanodalvik
 
 import android.app.Application
+import com.nanodalvik.data.Mode
 import com.nanodalvik.data.NanoDalvikVM
 import com.nanodalvik.data.cpp.NativeNanoDalvikVMImpl
 import com.nanodalvik.data.kotlin.ExecutionEngine
@@ -8,50 +9,61 @@ import com.nanodalvik.data.kotlin.Lexer
 import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
 import com.nanodalvik.data.kotlin.SourcePosition
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 
 class NanoDalvikApp : Application() {
-    private lateinit var dalvikVM: NanoDalvikVM
+    private lateinit var kotlinDalvikVM: NanoDalvikVM
+    private lateinit var nativeDalvikVM: NanoDalvikVM
+    private var _currentVMMode = Mode.KOTLIN
+    val currentMode: Mode
+        get() = _currentVMMode
+
+    val currentVM: NanoDalvikVM
+        get() = if (_currentVMMode == Mode.KOTLIN) kotlinDalvikVM else nativeDalvikVM
 
     override fun onCreate() {
         super.onCreate()
-        //initDalvikVMKotlin()
+        initDalvikVMKotlin()
         initDalvikNative()
+    }
+
+    suspend fun switchVMMode() {
+        currentVM.clear()
+        _currentVMMode = if (_currentVMMode == Mode.KOTLIN) Mode.NATIVE else Mode.KOTLIN
     }
 
     private fun initDalvikVMKotlin() {
         val lexer = Lexer()
         val executionEngine = ExecutionEngine()
-        dalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
+        kotlinDalvikVM = NanoDalvikVMKotlinImpl(lexer, executionEngine)
     }
+
     private fun initDalvikNative() {
-        dalvikVM = NativeNanoDalvikVMImpl()
-        dalvikVM.startUp()
+        nativeDalvikVM = NativeNanoDalvikVMImpl()
+        nativeDalvikVM.startUp()
     }
 
     suspend fun runProgram(code: String) {
-        dalvikVM.clear()
-        dalvikVM.startUp()
+        currentVM.clear()
+        currentVM.startUp()
 
-        dalvikVM.loadProgram(code)
-        dalvikVM.executeProgram()
+        currentVM.loadProgram(code)
+        currentVM.executeProgram()
     }
 
     suspend fun nextStep(code: String) {
-        if (!(dalvikVM.isProgramLoaded())) {
-            dalvikVM.loadProgram(code)
+        if (!(currentVM.isProgramLoaded())) {
+            currentVM.loadProgram(code)
         }
 
-        dalvikVM.executeNextOp()
+        currentVM.executeNextOp()
     }
 
-    fun observeOutput(): Flow<List<LogEntry>> = dalvikVM.observeOutput()
+    fun observeOutput(): Flow<List<LogEntry>> = kotlinDalvikVM.observeOutput()
 
-    fun observeStackState(): Flow<List<Int>> = dalvikVM.observeStackState()
+    fun observeStackState(): Flow<List<Int>> = kotlinDalvikVM.observeStackState()
 
     fun observeExecutionPosition(): Flow<Pair<Int, SourcePosition>> =
-        dalvikVM.observeSourcePosition()
+        kotlinDalvikVM.observeSourcePosition()
 
 }
