@@ -49,6 +49,8 @@ class NativeNanoDalvikVMImpl : NanoDalvikVM {
     }
 
     override suspend fun clear() {
+        logsToEmit.clear()
+        _output.emit(logsToEmit)
         clearNative()
     }
 

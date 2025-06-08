@@ -55,6 +55,7 @@ class NanoDalvikVMKotlinImpl(
 
     override suspend fun clear() {
         executionEngine.unloadProgram()
+        logsToEmit.clear()
         _output.emit(emptyList())
         _stackState.emit(emptyList())
     }

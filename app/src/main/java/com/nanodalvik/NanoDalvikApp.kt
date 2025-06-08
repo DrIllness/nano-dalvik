@@ -10,11 +10,12 @@ import com.nanodalvik.data.kotlin.LogEntry
 import com.nanodalvik.data.kotlin.NanoDalvikVMKotlinImpl
 import com.nanodalvik.data.kotlin.SourcePosition
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.merge
 
 class NanoDalvikApp : Application() {
     private lateinit var kotlinDalvikVM: NanoDalvikVM
     private lateinit var nativeDalvikVM: NanoDalvikVM
-    private var _currentVMMode = Mode.KOTLIN
+    private var _currentVMMode = Mode.NATIVE
     val currentMode: Mode
         get() = _currentVMMode
 
@@ -59,11 +60,15 @@ class NanoDalvikApp : Application() {
         currentVM.executeNextOp()
     }
 
-    fun observeOutput(): Flow<List<LogEntry>> = kotlinDalvikVM.observeOutput()
+    fun observeOutput(): Flow<List<LogEntry>> =
+        merge(kotlinDalvikVM.observeOutput(), nativeDalvikVM.observeOutput())
 
-    fun observeStackState(): Flow<List<Int>> = kotlinDalvikVM.observeStackState()
+    fun observeStackState(): Flow<List<Int>> = merge(
+            kotlinDalvikVM.observeStackState(),
+            nativeDalvikVM.observeStackState()
+    )
 
     fun observeExecutionPosition(): Flow<Pair<Int, SourcePosition>> =
-        kotlinDalvikVM.observeSourcePosition()
+        merge(kotlinDalvikVM.observeSourcePosition(), nativeDalvikVM.observeSourcePosition())
 
 }

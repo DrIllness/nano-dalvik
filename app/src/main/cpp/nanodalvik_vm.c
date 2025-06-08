@@ -73,30 +73,206 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     }
                     break;
                 case OP_HALT:
+                    vm->state = STATE_HALTED;
                     break;
                 case OP_JMP:
+                    if (op->operand < 0 || op->operand >= vm->program_size)
+                    {
+                        error_code = STACK_UNDERFLOW; // invalid jump
+                        strcpy(op_res->error, "Invalid jump address");
+                    } else
+                    {
+                        vm->ip = op->operand -
+                                 1; // -1 because ip will be incremented after this switch
+                    }
                     break;
                 case OP_JNZ:
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        stack_pop(vm->values_stack, &top_value);
+                        if (top_value != 0)
+                        {
+                            if (op->operand < 0 || op->operand >= vm->program_size)
+                            {
+                                error_code = STACK_UNDERFLOW; // invalid jump
+                                strcpy(op_res->error, "Invalid jump address");
+                            } else
+                            {
+                                vm->ip = op->operand -
+                                         1; // -1 because ip will be incremented after this switch
+                            }
+                        }
+                    }
                     break;
                 case OP_JZ:
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        stack_pop(vm->values_stack, &top_value);
+                        if (top_value == 0)
+                        {
+                            if (op->operand < 0 || op->operand >= vm->program_size)
+                            {
+                                error_code = STACK_UNDERFLOW; // invalid jump
+                                strcpy(op_res->error, "Invalid jump address");
+                            } else
+                            {
+                                vm->ip = op->operand -
+                                         1; // -1 because ip will be incremented after this switch
+                            }
+                        }
+                    }
                     break;
                 case OP_SUB:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        long diff;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        diff = val1 - val2;
+                        stack_push(vm->values_stack, &diff);
+                    }
                     break;
                 case OP_MUL:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        long product;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        product = val1 * val2;
+                        stack_push(vm->values_stack, &product);
+                    }
                     break;
                 case OP_DIV:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        long quotient;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        if (val2 == 0)
+                        {
+                            error_code = STACK_UNDERFLOW; // division by zero
+                            strcpy(op_res->error, "Division by zero");
+                        } else
+                        {
+                            quotient = val1 / val2;
+                            stack_push(vm->values_stack, &quotient);
+                        }
+                    }
                     break;
                 case OP_MOD:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        long remainder;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        if (val2 == 0)
+                        {
+                            error_code = STACK_UNDERFLOW; // division by zero
+                            strcpy(op_res->error, "Division by zero");
+                        } else
+                        {
+                            remainder = val1 % val2;
+                            stack_push(vm->values_stack, &remainder);
+                        }
+                    }
                     break;
                 case OP_NEG:
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val;
+                        stack_pop(vm->values_stack, &val);
+                        long negated = -val;
+                        stack_push(vm->values_stack, &negated);
+                    }
                     break;
                 case OP_SWAP:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        stack_push(vm->values_stack, &val1);
+                        stack_push(vm->values_stack, &val2);
+                    }
                     break;
                 case OP_DROP:
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        stack_pop(vm->values_stack, &top_value);
+                    }
                     break;
                 case OP_OVER:
+                    if (vm->values_stack->logical_len < 2)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val1;
+                        long val2;
+                        stack_pop(vm->values_stack, &val1);
+                        stack_pop(vm->values_stack, &val2);
+                        stack_push(vm->values_stack, &val2);
+                        stack_push(vm->values_stack, &val1);
+                    }
                     break;
                 case OP_DUP:
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[0].msg);
+                    } else
+                    {
+                        long val;
+                        stack_pop(vm->values_stack, &val);
+                        stack_push(vm->values_stack, &val);
+                        stack_push(vm->values_stack, &val);
+                    }
                     break;
                 case OP_LOAD:
                     break;
@@ -283,9 +459,5 @@ void nanodalvik_load_program(NanoDalvik* vm, const char* program)
 
 void nanodalvik_clear(NanoDalvik* vm)
 {
-    if (vm->program != NULL)
-        free(vm->program);
-
-    stack_dispose(vm->values_stack);
-    free(vm);
+    //
 }
