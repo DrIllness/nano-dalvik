@@ -5,6 +5,14 @@
 #define STATE_RUNNING 1
 #define STATE_IDLE 2
 
+#define HEAP_ELEMENT_TYPE long
+#define HEAP_ELEMENT_SIZE sizeof(HEAP_ELEMENT_TYPE)
+#define HEAP_INITIAL_CAPACITY 100
+#define HEAP_INITIAL_SIZE (HEAP_ELEMENT_SIZE*HEAP_INITIAL_CAPACITY)
+#define HEAP_GROWTH_FACTOR 2
+#define HEAP_MAX_SIZE 1000
+
+
 typedef enum ErrorLevel
 {
     ERR_LEXER,
@@ -16,7 +24,12 @@ typedef enum ErrorCode
 {
     NO_ERROR,
     STACK_UNDERFLOW,
-    STACK_OVERFLOW
+    STACK_OVERFLOW,
+    HEAP_FAILED_TO_ALLOCATE,
+    HEAP_FAILED_TO_STORE,
+    HEAP_FAILED_TO_LOAD,
+    RUNTIME_ERROR,
+    JUMP_INVALID_ADDRESS
 } ErrorCode;
 
 typedef struct Error
@@ -27,8 +40,13 @@ typedef struct Error
 } Error;
 
 static Error ERRORS[] = {
-        {STACK_UNDERFLOW, ERR_EXECUTION, "Stack Underflow"},
-        {STACK_OVERFLOW,  ERR_EXECUTION, "Stack Overflow"}
+        { STACK_UNDERFLOW, ERR_EXECUTION, "Stack Underflow" },
+        { STACK_OVERFLOW,  ERR_EXECUTION, "Stack Overflow" },
+        { HEAP_FAILED_TO_ALLOCATE, ERR_EXECUTION, "Failed to allocate memory"},
+        { HEAP_FAILED_TO_STORE, ERR_EXECUTION, "Failed to store element"},
+        { HEAP_FAILED_TO_LOAD, ERR_EXECUTION, "Failed to load element"},
+        { RUNTIME_ERROR, ERR_EXECUTION, "Runtime error"},
+        {JUMP_INVALID_ADDRESS, ERR_EXECUTION, "Invalid address for JUMP"}
 };
 
 typedef enum OPCodeName
@@ -127,6 +145,8 @@ typedef struct NanoDalvik
     int ip;
     int state;
     Stack* values_stack;
+    void* heap;
+    int heap_current_size;
 } NanoDalvik;
 
 

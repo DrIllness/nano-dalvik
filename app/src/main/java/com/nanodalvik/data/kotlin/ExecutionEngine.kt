@@ -254,7 +254,7 @@ class ExecutionEngine {
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.STACK_UNDERFLOW)
                 } else {
-                    stack.peekLast()?.let { elem ->
+                    stack.pollLast()?.let { elem ->
                         memory[op.addr] = elem
                     }
                 }

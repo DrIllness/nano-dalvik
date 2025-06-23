@@ -7,6 +7,7 @@
 #define LOG_TAG "kekus"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
+
 void nanodalvik_initialize(NanoDalvik* vm)
 {
     Stack* stack = malloc(sizeof(Stack));
@@ -14,6 +15,8 @@ void nanodalvik_initialize(NanoDalvik* vm)
 
     vm->values_stack = stack;
     vm->state = STATE_IDLE;
+    vm->heap = calloc(HEAP_INITIAL_SIZE, HEAP_ELEMENT_SIZE);
+    vm->heap_current_size = HEAP_INITIAL_CAPACITY;
 }
 
 OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
@@ -78,8 +81,8 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                 case OP_JMP:
                     if (op->operand < 0 || op->operand >= vm->program_size)
                     {
-                        error_code = STACK_UNDERFLOW; // invalid jump
-                        strcpy(op_res->error, "Invalid jump address");
+                        error_code = JUMP_INVALID_ADDRESS; // invalid jump
+                        strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                     } else
                     {
                         vm->ip = op->operand -
@@ -90,7 +93,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -98,8 +101,8 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         {
                             if (op->operand < 0 || op->operand >= vm->program_size)
                             {
-                                error_code = STACK_UNDERFLOW; // invalid jump
-                                strcpy(op_res->error, "Invalid jump address");
+                                error_code = JUMP_INVALID_ADDRESS;
+                                strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                             } else
                             {
                                 vm->ip = op->operand -
@@ -112,7 +115,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -120,8 +123,8 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         {
                             if (op->operand < 0 || op->operand >= vm->program_size)
                             {
-                                error_code = STACK_UNDERFLOW; // invalid jump
-                                strcpy(op_res->error, "Invalid jump address");
+                                error_code = JUMP_INVALID_ADDRESS;
+                                strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                             } else
                             {
                                 vm->ip = op->operand -
@@ -134,7 +137,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -150,7 +153,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -166,7 +169,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -176,8 +179,8 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         stack_pop(vm->values_stack, &val2);
                         if (val2 == 0)
                         {
-                            error_code = STACK_UNDERFLOW; // division by zero
-                            strcpy(op_res->error, "Division by zero");
+                            error_code = RUNTIME_ERROR;
+                            strcpy(op_res->error, ERRORS[RUNTIME_ERROR].msg);
                         } else
                         {
                             quotient = val1 / val2;
@@ -189,7 +192,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -199,8 +202,8 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         stack_pop(vm->values_stack, &val2);
                         if (val2 == 0)
                         {
-                            error_code = STACK_UNDERFLOW; // division by zero
-                            strcpy(op_res->error, "Division by zero");
+                            error_code = RUNTIME_ERROR;
+                            strcpy(op_res->error, ERRORS[RUNTIME_ERROR].msg);
                         } else
                         {
                             remainder = val1 % val2;
@@ -212,7 +215,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val;
@@ -240,7 +243,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -250,7 +253,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -275,10 +278,81 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     }
                     break;
                 case OP_LOAD:
+                    long heap_address = op->operand;
+                    if (heap_address < 0 || heap_address >= vm->heap_current_size)
+                    {
+                        error_code = HEAP_FAILED_TO_LOAD;
+                        strcpy(op_res->error, ERRORS[4].msg);
+                    } else
+                    {
+                        if (vm->heap == NULL)
+                        {
+                            error_code = HEAP_FAILED_TO_LOAD;
+                            strcpy(op_res->error, ERRORS[4].msg);
+                        } else
+                        {
+                            HEAP_ELEMENT_TYPE* val_from_memory =
+                            (HEAP_ELEMENT_TYPE*) (vm->heap) + heap_address;
+                            stack_push(vm->values_stack, val_from_memory);
+                        }
+                    }
                     break;
                 case OP_STORE:
+
+                    if (vm->values_stack->logical_len < 1)
+                    {
+                        error_code = STACK_UNDERFLOW;
+                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
+                    } else
+                    {
+                        long top_value;
+                        long heap_address = op->operand;
+
+                        stack_pop(vm->values_stack, &top_value);
+                        if (heap_address < 0 || heap_address >= HEAP_MAX_SIZE)
+                        {
+                            error_code = HEAP_FAILED_TO_STORE;
+                            strcpy(op_res->error, ERRORS[HEAP_FAILED_TO_STORE].msg);
+                        } else
+                        {
+                            if (vm->heap != NULL)
+                            {
+                                if (heap_address > vm->heap_current_size &&
+                                    heap_address < HEAP_MAX_SIZE)
+                                {
+                                    int new_size = (heap_address * HEAP_GROWTH_FACTOR <
+                                                    HEAP_MAX_SIZE) ? heap_address *
+                                                                     HEAP_GROWTH_FACTOR
+                                                                   : HEAP_MAX_SIZE;
+                                    vm->heap = realloc(vm->heap,
+                                                       new_size *
+                                                       HEAP_ELEMENT_SIZE);
+                                    if (vm->heap != NULL)
+                                        vm->heap_current_size = new_size;
+                                    else
+                                    {
+                                        error_code = HEAP_FAILED_TO_ALLOCATE;
+                                        strcpy(op_res->error, ERRORS[2].msg);
+                                    }
+                                }
+
+                                memcpy(((HEAP_ELEMENT_TYPE*) vm->heap) + heap_address,
+                                       &top_value, HEAP_ELEMENT_SIZE);
+                            } else
+                            {
+                                error_code = HEAP_FAILED_TO_ALLOCATE;
+                                strcpy(op_res->error, ERRORS[HEAP_FAILED_TO_ALLOCATE].msg);
+                            }
+                        }
+                    }
                     break;
                 case OP_CLEARMEM:
+                    if (vm->heap != NULL)
+                    {
+                        free(vm->heap);
+                    }
+                    vm->heap = calloc(HEAP_INITIAL_CAPACITY, HEAP_ELEMENT_SIZE);
+                    vm->heap_current_size = HEAP_INITIAL_CAPACITY;
                     break;
                 case OP_CALL:
                     break;
