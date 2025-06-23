@@ -242,7 +242,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                 case OP_DROP:
                     if (vm->values_stack->logical_len < 1)
                     {
-                        error_code = STACK_UNDERFLOW;
+                        error_code = STACK_UNDERFLOW; //todo check on fibonacci program
                         strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
@@ -379,7 +379,7 @@ void print_tokenization(Token* tokens, int size);
 
 void word_to_token(char* word, Token* tokens, int words_amount, int word_size)
 {
-    if (word[0] > '0' && word[0] < '9')
+    if (word[0] >= '0' && word[0] <= '9')
     {
         char* end_ptr;
         (tokens + words_amount)->type = LITERAL;
@@ -420,7 +420,10 @@ Token* tokenize(const char* program, int* tokens_amount)
                 words_amount++;
                 word_size = 0;
             } else
+            {
+                i++;
                 continue;
+            }
         } else
         {
             is_reading = true;
