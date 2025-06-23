@@ -355,6 +355,7 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     vm->heap_current_size = HEAP_INITIAL_CAPACITY;
                     break;
                 case OP_CALL:
+
                     break;
                 case OP_RET:
                     break;

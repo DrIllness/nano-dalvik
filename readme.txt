@@ -1,49 +1,37 @@
 Idea
-Minimalistic stack-based VM for executing assembly-like code on Android. First implementation is in Kotlin, but plans are to implement same VM in C/C++, utilizing JNI.
+Minimalistic stack-based VM for executing assembly-like code on Android.
+Kotlin version is discontinued for now, C version is under development.
 
 Fibonacci number example:
 // 7th fibonacci number
 push 7
 store 0
-drop
 
 push 0
 store 1
 push 1
 store 2
-drop
-drop
 
 load 0
-jz 26
+jz 20
 drop
 load 1
 dup
 load 2
 add
 store 1
-drop
 store 2
-drop
 load 0
 push 1
 sub
 store 0
-drop
-jmp 9
+jmp 6
 
 load 1
 print
 
 
 TODO
-kotlin version: add labels support for constants
-(low priority) clean repetition in parser/engine
-(low priority) color the commands. This takes to parse text in realtime, basically, on each
-change in text field
-
-both:
-make it possible to switch between different modes
-
 c version:
-add missing instructions
+1. impl label support for calls
+2. impl label support for constants
