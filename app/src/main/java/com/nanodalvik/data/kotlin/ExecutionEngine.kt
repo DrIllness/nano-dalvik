@@ -113,7 +113,7 @@ class ExecutionEngine {
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.JMP_COMPARISON_FAILED)
                 } else {
-                    if (stack.peekLast() != 0) {
+                    if (stack.pollLast() != 0) {
                         ip = idx
                     }
                 }
@@ -124,7 +124,7 @@ class ExecutionEngine {
                 if (stack.isEmpty()) {
                     errors.add(VMErrors.JMP_COMPARISON_FAILED)
                 } else {
-                    if (stack.peekLast() == 0) {
+                    if (stack.pollLast() == 0) {
                         ip = idx
                     }
                 }

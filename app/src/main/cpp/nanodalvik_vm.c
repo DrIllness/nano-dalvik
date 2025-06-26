@@ -22,7 +22,6 @@ void nanodalvik_initialize(NanoDalvik* vm)
 OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
 {
     OpResult* op_res = malloc(sizeof(OpResult));
-    op_res->error = "";
     op_res->output = "";
 
     OpCode* op = vm->program + vm->ip;
@@ -47,7 +46,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
                     } else
                     {
                         long val1;
@@ -82,7 +80,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (op->operand < 0 || op->operand >= vm->program_size)
                     {
                         error_code = JUMP_INVALID_ADDRESS; // invalid jump
-                        strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                     } else
                     {
                         vm->ip = op->operand -
@@ -93,7 +90,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -102,7 +98,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                             if (op->operand < 0 || op->operand >= vm->program_size)
                             {
                                 error_code = JUMP_INVALID_ADDRESS;
-                                strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                             } else
                             {
                                 vm->ip = op->operand -
@@ -115,7 +110,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -124,7 +118,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                             if (op->operand < 0 || op->operand >= vm->program_size)
                             {
                                 error_code = JUMP_INVALID_ADDRESS;
-                                strcpy(op_res->error, ERRORS[JUMP_INVALID_ADDRESS].msg);
                             } else
                             {
                                 vm->ip = op->operand -
@@ -137,14 +130,13 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
-                        long val1;
                         long val2;
+                        long val1;
                         long diff;
-                        stack_pop(vm->values_stack, &val1);
                         stack_pop(vm->values_stack, &val2);
+                        stack_pop(vm->values_stack, &val1);
                         diff = val1 - val2;
                         stack_push(vm->values_stack, &diff);
                     }
@@ -153,7 +145,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -169,7 +160,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -180,7 +170,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         if (val2 == 0)
                         {
                             error_code = RUNTIME_ERROR;
-                            strcpy(op_res->error, ERRORS[RUNTIME_ERROR].msg);
                         } else
                         {
                             quotient = val1 / val2;
@@ -192,7 +181,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -203,7 +191,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                         if (val2 == 0)
                         {
                             error_code = RUNTIME_ERROR;
-                            strcpy(op_res->error, ERRORS[RUNTIME_ERROR].msg);
                         } else
                         {
                             remainder = val1 % val2;
@@ -215,7 +202,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val;
@@ -228,7 +214,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
                     } else
                     {
                         long val1;
@@ -243,7 +228,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW; //todo check on fibonacci program
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         stack_pop(vm->values_stack, &top_value);
@@ -253,7 +237,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 2)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
                         long val1;
@@ -268,7 +251,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[0].msg);
                     } else
                     {
                         long val;
@@ -278,17 +260,16 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     }
                     break;
                 case OP_LOAD:
-                    long heap_address = op->operand;
+                    long heap_address;
+                    heap_address = op->operand;
                     if (heap_address < 0 || heap_address >= vm->heap_current_size)
                     {
                         error_code = HEAP_FAILED_TO_LOAD;
-                        strcpy(op_res->error, ERRORS[4].msg);
                     } else
                     {
                         if (vm->heap == NULL)
                         {
                             error_code = HEAP_FAILED_TO_LOAD;
-                            strcpy(op_res->error, ERRORS[4].msg);
                         } else
                         {
                             HEAP_ELEMENT_TYPE* val_from_memory =
@@ -302,17 +283,14 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                     if (vm->values_stack->logical_len < 1)
                     {
                         error_code = STACK_UNDERFLOW;
-                        strcpy(op_res->error, ERRORS[STACK_UNDERFLOW].msg);
                     } else
                     {
-                        long top_value;
                         long heap_address = op->operand;
 
                         stack_pop(vm->values_stack, &top_value);
                         if (heap_address < 0 || heap_address >= HEAP_MAX_SIZE)
                         {
                             error_code = HEAP_FAILED_TO_STORE;
-                            strcpy(op_res->error, ERRORS[HEAP_FAILED_TO_STORE].msg);
                         } else
                         {
                             if (vm->heap != NULL)
@@ -332,7 +310,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                                     else
                                     {
                                         error_code = HEAP_FAILED_TO_ALLOCATE;
-                                        strcpy(op_res->error, ERRORS[2].msg);
                                     }
                                 }
 
@@ -341,7 +318,6 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
                             } else
                             {
                                 error_code = HEAP_FAILED_TO_ALLOCATE;
-                                strcpy(op_res->error, ERRORS[HEAP_FAILED_TO_ALLOCATE].msg);
                             }
                         }
                     }
@@ -363,7 +339,40 @@ OpResult* nanodalvik_execute_next_op(NanoDalvik* vm)
         }
         (vm->ip)++;
     }
+
+    set_error(error_code, op_res);
     return op_res;
+}
+
+void set_error(ErrorCode code, OpResult* op)
+{
+    switch (code)
+    {
+        case NO_ERROR:
+            op->error = NULL;
+            break;
+        case STACK_UNDERFLOW:
+            op->error = &ERRORS[0];
+            break;
+        case STACK_OVERFLOW:
+            op->error = &ERRORS[1];
+            break;
+        case HEAP_FAILED_TO_ALLOCATE:
+            op->error = &ERRORS[2];
+            break;
+        case HEAP_FAILED_TO_STORE:
+            op->error = &ERRORS[3];
+            break;
+        case HEAP_FAILED_TO_LOAD:
+            op->error = &ERRORS[4];
+            break;
+        case RUNTIME_ERROR:
+            op->error = &ERRORS[5];
+            break;
+        case JUMP_INVALID_ADDRESS:
+            op->error = &ERRORS[6];
+            break;
+    }
 }
 
 bool nanodalvik_has_next_op(NanoDalvik* vm)

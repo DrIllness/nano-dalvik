@@ -28,7 +28,8 @@ void notify_java_layer(JNIEnv* env, jobject* thiz, OpResult* res)
     jmethodID ctor = (*env)->GetMethodID(env, cls, "<init>",
                                          "(ILjava/lang/String;Ljava/lang/String;)V");
     jstring outputStr = (*env)->NewStringUTF(env, res->output);
-    jstring errorStr = (*env)->NewStringUTF(env, res->error);
+
+    jstring errorStr = (*env)->NewStringUTF(env, res->error == NULL ? "" : res->error->msg);
 
     jobject result = (*env)->NewObject(env, cls, ctor, 0, outputStr, errorStr);
     jclass clazz = (*env)->GetObjectClass(env, *thiz);

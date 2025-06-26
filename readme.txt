@@ -13,8 +13,7 @@ push 1
 store 2
 
 load 0
-jz 20
-drop
+jz 19
 load 1
 dup
 load 2

@@ -36,7 +36,7 @@ typedef struct Error
 {
     ErrorCode code;
     ErrorLevel lvl;
-    char* msg;
+    const char* const msg;
 } Error;
 
 static Error ERRORS[] = {
@@ -131,10 +131,12 @@ typedef struct Token
 typedef struct OpResult
 {
     char* output;
-    char* error;
+    Error* error;
     //int* stack_state;
     //int ip;
 } OpResult;
+
+void set_error(ErrorCode code, OpResult* op);
 
 void clear_op_result(OpResult* res);
 
