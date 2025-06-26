@@ -32,6 +32,5 @@ print
 
 TODO
 c version:
-0. fix allocation for error str
 1. impl label support for calls
 2. impl label support for constants

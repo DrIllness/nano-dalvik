@@ -2,7 +2,8 @@
 #include <android/log.h>
 #include <stdlib.h>
 #include "nanodalvik_vm.h"
-
+#define LOG_TAG "nanodalvik_vm_jni.c"
+#define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 static NanoDalvik* vm;
 
 JNIEXPORT void JNICALL

@@ -41,8 +41,8 @@ int stack_push(Stack* s, void* value)
 static int stack_grow(Stack* s)
 {
     s->allocated_len *= 2;
-    void* new_elems = realloc(s->elems, s->allocated_len * s->elem_size);
-    if (new_elems == NULL)
+    s->elems = realloc(s->elems, s->allocated_len * s->elem_size);
+    if (s->elems == NULL)
         return FAILED_TO_REALLOCATE_STACK;
 
     return 0;

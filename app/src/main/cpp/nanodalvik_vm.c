@@ -4,7 +4,7 @@
 
 #include "nanodalvik_vm.h"
 
-#define LOG_TAG "kekus"
+#define LOG_TAG "nanodalvik_vm.c"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 
@@ -450,7 +450,7 @@ Token* tokenize(const char* program, int* tokens_amount)
 
     *tokens_amount = words_amount;
 
-    print_tokenization(tokens, words_amount);
+    //print_tokenization(tokens, words_amount);
 
     return tokens;
 }
